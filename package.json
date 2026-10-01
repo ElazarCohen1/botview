@@ -1,0 +1,29 @@
+{
+  "name": "botview",
+  "version": "1.0.0",
+  "description": "s",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -n back,front -c blue,green \"npm run dev:back\" \"npm run dev:front\"",
+    "dev:back": "cd backend && mvn mn:run",
+    "dev:front": "cd frontend && npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd frontend && npm run build && cd ../backend && mvn package",
+    "start": "java -jar backend/target/ton-app.jar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/elazarcohen01-group/botview.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://gitlab.com/elazarcohen01-group/botview/issues"
+  },
+  "homepage": "https://gitlab.com/elazarcohen01-group/botview#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}
