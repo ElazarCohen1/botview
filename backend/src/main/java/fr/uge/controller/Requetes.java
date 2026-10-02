@@ -1,4 +1,5 @@
 package fr.uge.controller;
+
 import fr.uge.enums.Plateformes;
 import fr.uge.model.PullRequest;
 import fr.uge.model.Repo;
@@ -13,61 +14,65 @@ import java.util.Objects;
 
 @Singleton
 public class Requetes {
-    private  final DataSource dataSource;
+  private final DataSource dataSource;
 
-    public  Requetes(DataSource dataSource){
-        Objects.requireNonNull(dataSource);
-        this.dataSource = dataSource;
-        super();
+  public Requetes(DataSource dataSource) {
+    Objects.requireNonNull(dataSource);
+    this.dataSource = dataSource;
+    super();
+  }
+
+  @Transactional
+  public List<Repo> getAllRep() throws SQLException {
+    try (Connection conn = dataSource.getConnection()) {
+      Statement stmt = conn.createStatement();
+      ResultSet res = stmt.executeQuery("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT");
+      List<Repo> all_rep = new ArrayList<>();
+      while (res.next()) {
+        all_rep.add(new Repo(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), Plateformes.valueOf(res.getString("plateforme")), res.getString("branche")));
+      }
+      return all_rep;
     }
-    @Transactional
-    public List<Repo> getAllRep() throws  SQLException{
-        try (Connection conn = dataSource.getConnection()){
-            Statement stmt = conn.createStatement();
-            ResultSet res =  stmt.executeQuery("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT" );
-            List<Repo> all_rep = new ArrayList<>();
-            while (res.next()){
-                all_rep.add(new Repo(res.getInt("rep_id"), res.getString("nom"),res.getString("url"),Plateformes.valueOf(res.getString("plateforme")),res.getString("branche")));
-            }
-            return all_rep;
-        }
+  }
+
+  @Transactional
+  public List<PullRequest> getAllPr() throws SQLException {
+    try (Connection conn = dataSource.getConnection()) {
+      Statement stmt = conn.createStatement();
+      ResultSet res = stmt.executeQuery("SELECT pull_id, commentaire, name, date from PULL_REQUEST");
+      List<PullRequest> all_rep = new ArrayList<>();
+      while (res.next()) {
+        all_rep.add(new PullRequest(res.getInt("pull_id"), res.getString("commentaire"), res.getString("name"), res.getTimestamp("date").toInstant()));
+      }
+      return all_rep;
     }
-    @Transactional
-    public List<PullRequest> getAllPr() throws  SQLException{
-        try (Connection conn = dataSource.getConnection()){
-            Statement stmt = conn.createStatement();
-            ResultSet res =  stmt.executeQuery("SELECT pull_id, commentaire, name, date from PULL_REQUEST" );
-            List<PullRequest> all_rep = new ArrayList<>();
-            while (res.next()){
-                all_rep.add(new PullRequest(res.getInt("pull_id"), res.getString("commentaire"),res.getString("name"),res.getTimestamp("date").toInstant()));
-            }
-            return all_rep;
-        }
+  }
+
+  @Transactional
+  public Repo getRep(int repId) throws SQLException {
+    try (Connection conn = dataSource.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT where rep_id = ?");
+      stmt.setInt(1, repId);
+      ResultSet res = stmt.executeQuery();
+      if (!res.next()) {
+        return null;
+      }
+      return new Repo(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), Plateformes.valueOf(res.getString("plateforme")), res.getString("branche"));
     }
-    @Transactional
-    public Repo getRep(int repId) throws SQLException {
-        try (Connection conn = dataSource.getConnection()){
-            PreparedStatement stmt = conn.prepareStatement("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT where rep_id = ?");
-            stmt.setInt(1,repId);
-            ResultSet res =  stmt.executeQuery();
-            if(!res.next()){
-                return  null;
-            }
-            return new Repo(res.getInt("rep_id"), res.getString("nom"),res.getString("url"), Plateformes.valueOf(res.getString("plateforme")) ,res.getString("branche"));
-        }
+  }
+
+  @Transactional
+  public PullRequest getPr(int prId) throws SQLException {
+    try (Connection conn = dataSource.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement("SELECT pull_id, commentaire, name, date from PULL_REQUEST where pull_id = ?");
+      stmt.setInt(1, prId);
+      ResultSet res = stmt.executeQuery();
+      if (!res.next()) {
+        return null;
+      }
+      return new PullRequest(res.getInt("pull_id"), res.getString("commentaire"), res.getString("name"), res.getTimestamp("date").toInstant());
     }
-    @Transactional
-    public PullRequest getPr(int prId) throws SQLException {
-        try (Connection conn = dataSource.getConnection()){
-            PreparedStatement stmt = conn.prepareStatement("SELECT pull_id, commentaire, name, date from PULL_REQUEST where pull_id = ?");
-            stmt.setInt(1,prId);
-            ResultSet res =  stmt.executeQuery();
-            if(!res.next()){
-                return  null;
-            }
-            return new PullRequest(res.getInt("pull_id"), res.getString("commentaire"),res.getString("name"),res.getTimestamp("date").toInstant());
-        }
-    }
+  }
 }
 // changer les nom et mettre expli
 // java doc

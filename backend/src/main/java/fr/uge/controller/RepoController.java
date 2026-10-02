@@ -16,21 +16,21 @@ import java.util.Objects;
 @Controller("/repo")
 public class RepoController {
 
-    private final  Requetes requetes;
+  private final Requetes requetes;
 
-    public RepoController(Requetes requetes){
-        Objects.requireNonNull(requetes);
-        this.requetes = requetes;
-        super();
-    }
+  public RepoController(Requetes requetes) {
+    Objects.requireNonNull(requetes);
+    this.requetes = requetes;
+    super();
+  }
 
-    @Get
-    public List<Repo> getAllRep() throws  SQLException{
-        return  requetes.getAllRep();
-    }
+  @Get
+  public List<Repo> getAllRep() throws SQLException {
+    return requetes.getAllRep();
+  }
 
-    @Get("/{repId}")
-    public  Repo getRep(int repId) throws  SQLException{
-        return requetes.getRep(repId);
-    }
+  @Get("/{repId}")
+  public Repo getRep(int repId) throws SQLException {
+    return requetes.getRep(repId);
+  }
 }

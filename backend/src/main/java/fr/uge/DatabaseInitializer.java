@@ -1,36 +1,112 @@
 package fr.uge;
-import java.sql.*;
+
+import io.micronaut.context.event.StartupEvent;
+import io.micronaut.data.connection.annotation.Connectable;
+import io.micronaut.runtime.event.annotation.EventListener;
+import jakarta.inject.Singleton;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Objects;
 
+
+// one only instance of this class
+@Singleton
 public class DatabaseInitializer {
 
-    //private final String url = "jdbc:duckdb:./data/botview.duckdb";
-    private final String url;
+  private final DataSource dataSource;
 
-    public DatabaseInitializer(String url){
-        Objects.requireNonNull(url);
-        this.url = url;
-        super();
+  public DatabaseInitializer(DataSource dataSource) {
+    this.dataSource = Objects.requireNonNull(dataSource);
+  }
+
+  @Connectable
+  @EventListener // run this method on the start of the application
+  public void onStartup(StartupEvent event) {
+    try {
+      init();
+    } catch (SQLException e) {
+      System.err.println("The initialisation of the database crashed !!" + e);
+      System.exit(1);
     }
+  }
 
-    public  void init(){
-        try{
-            Connection conn = DriverManager.getConnection(url);
-            System.out.println("Connexion réussie !");
+  public void init() throws SQLException{
+    try (var conn = dataSource.getConnection();
+         var stmt = conn.createStatement()) {
 
-            Statement stmt = conn.createStatement();
-            stmt.execute("CREATE TABLE IF NOT EXISTS CLIENT (num_id INTEGER PRIMARY KEY, nom VARCHAR, prenom VARCHAR, email VARCHAR) ");
-            stmt.execute("CREATE TABLE IF NOT EXISTS REPO_GIT (rep_id INTEGER PRIMARY KEY, nom VARCHAR, url VARCHAR, plateforme VARCHAR, branche VARCHAR) ");
-            stmt.execute("CREATE TABLE IF NOT EXISTS PULL_REQUEST (pull_id INTEGER PRIMARY KEY, commentaire TEXT, name VARCHAR, date TIMESTAMP, rep_id INTEGER REFERENCES REPO_GIT(rep_id)) ");
-            stmt.execute("CREATE TABLE IF NOT EXISTS FICHIER  (fichier_id INTEGER PRIMARY KEY,  name VARCHAR, relative_path VARCHAR) ");
-            stmt.execute("CREATE TABLE IF NOT EXISTS MODIFIE  ( pull_id INTEGER REFERENCES PULL_REQUEST(pull_id),date_modification TIMESTAMP , status VARCHAR , fichier_id INTEGER REFERENCES FICHIER(fichier_id), PRIMARY KEY(fichier_id, pull_id) ) ");
-            stmt.execute("CREATE TABLE IF NOT EXISTS LIGNE_MODIFIE (ligne_id INTEGER PRIMARY KEY,fichier_id INTEGER, pull_id INTEGER, status VARCHAR, commentaire TEXT,ancienne TEXT, nouvelle TEXT, numero_ligne INTEGER, FOREIGN KEY(fichier_id,pull_id)  REFERENCES MODIFIE(fichier_id,pull_id) )");
-            stmt.execute("CREATE TABLE IF NOT EXISTS POSSEDE  (rep_id INTEGER REFERENCES REPO_GIT(rep_id), num_id INTEGER REFERENCES CLIENT(num_id), PRIMARY KEY(num_id, rep_id) ) ");
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS REPOSITORY (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR,
+          url VARCHAR,
+          origin VARCHAR
+        )""");
 
-            stmt.close();
-            conn.close();
-        } catch (SQLException e) {
-            System.out.println("Probleme de connexion base de donnée : " + e.getMessage());
-        }
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS PULL_REQUEST (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR,
+          commit_id VARCHAR,
+          status VARCHAR,
+          created_at TIMESTAMP,
+          repository_id INTEGER REFERENCES REPOSITORY(id)
+        )""");
+
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS REVIEW (
+          id INTEGER PRIMARY KEY,
+          global_comment TEXT,
+          status VARCHAR,
+          is_blocking BOOLEAN,
+          date TIMESTAMP,
+          pull_request_id INTEGER REFERENCES PULL_REQUEST(id)
+        )""");
+
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS ANALYSIS (
+          id INTEGER PRIMARY KEY,
+          tool VARCHAR,
+          result TEXT,
+          status VARCHAR,
+          date TIMESTAMP,
+          review_id INTEGER REFERENCES REVIEW(id)
+        )""");
+
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS FILE (
+          id INTEGER PRIMARY KEY,
+          status VARCHAR,
+          name VARCHAR,
+          relative_path VARCHAR,
+          date TIMESTAMP
+        )""");
+
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS MODIFIED_LINE (
+          id INTEGER PRIMARY KEY,
+          status VARCHAR,
+          old_value TEXT,
+          new_value TEXT,
+          file_id INTEGER REFERENCES FILE(id)
+        )""");
+
+      // Associations
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS MODIFIES (
+          pull_request_id INTEGER REFERENCES PULL_REQUEST(id),
+          file_id INTEGER REFERENCES FILE(id),
+          PRIMARY KEY (pull_request_id, file_id)
+        )""");
+
+      stmt.execute("""
+        CREATE TABLE IF NOT EXISTS COMMENTS_ON (
+          review_id INTEGER REFERENCES REVIEW(id),
+          modified_line_id INTEGER REFERENCES MODIFIED_LINE(id),
+          human_flag BOOLEAN,
+          PRIMARY KEY (review_id, modified_line_id)
+        )""");
+
     }
+  }
 }
