@@ -3,3 +3,6 @@ cahier.log
 cahier.out
 cahier.toc
 cahier.tex
+cahier.fls
+cahier.fdb_latexmk
+cahier.synctex.gz
