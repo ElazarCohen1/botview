@@ -1,8 +1,8 @@
 package fr.uge.controller;
 
-import fr.uge.enums.Plateformes;
+import fr.uge.enums.GitProvider;
 import fr.uge.model.PullRequest;
-import fr.uge.model.Repo;
+import fr.uge.model.Repository;
 import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
 
@@ -23,13 +23,13 @@ public class Requetes {
   }
 
   @Transactional
-  public List<Repo> getAllRep() throws SQLException {
+  public List<Repository> getAllRep() throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
       Statement stmt = conn.createStatement();
       ResultSet res = stmt.executeQuery("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT");
-      List<Repo> all_rep = new ArrayList<>();
+      List<Repository> all_rep = new ArrayList<>();
       while (res.next()) {
-        all_rep.add(new Repo(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), Plateformes.valueOf(res.getString("plateforme")), res.getString("branche")));
+        all_rep.add(new Repository(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProvider.valueOf(res.getString("plateforme")), res.getString("branche")));
       }
       return all_rep;
     }
@@ -49,7 +49,7 @@ public class Requetes {
   }
 
   @Transactional
-  public Repo getRep(int repId) throws SQLException {
+  public Repository getRep(int repId) throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT where rep_id = ?");
       stmt.setInt(1, repId);
@@ -57,7 +57,7 @@ public class Requetes {
       if (!res.next()) {
         return null;
       }
-      return new Repo(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), Plateformes.valueOf(res.getString("plateforme")), res.getString("branche"));
+      return new Repository(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProvider.valueOf(res.getString("plateforme")), res.getString("branche"));
     }
   }
 

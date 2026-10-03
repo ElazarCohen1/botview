@@ -42,7 +42,7 @@ public class DatabaseInitializer {
 
 
   private void createEnums(Connection conn, Statement stmt) throws SQLException {
-    createEnumIfAbsent(conn, stmt, "platform", "'GITHUB', 'GITLAB', 'BITBUCKET'");
+    createEnumIfAbsent(conn, stmt, "gitProvider", "'GITHUB', 'GITLAB', 'BITBUCKET'");
     createEnumIfAbsent(conn, stmt, "pr_status", "'OPEN', 'MERGED', 'CLOSED'");
     createEnumIfAbsent(conn, stmt, "review_status", "'PENDING', 'RUNNING', 'DONE', 'FAILED'");
     createEnumIfAbsent(conn, stmt, "analysis_status", "'PENDING', 'RUNNING', 'DONE', 'FAILED'");
@@ -78,14 +78,14 @@ public class DatabaseInitializer {
         id          INTEGER PRIMARY KEY DEFAULT nextval('repository_seq'),
         name        VARCHAR(255) NOT NULL CHECK (length(name) <= 255),
         url         VARCHAR(2048) NOT NULL UNIQUE CHECK (length(url) <= 2048),
-        origin      platform NOT NULL
+        origin      gitProvider NOT NULL
       )""");
 
     stmt.execute("""
       CREATE TABLE IF NOT EXISTS PULL_REQUEST (
         id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
         name           VARCHAR(255) NOT NULL,
-        commit_id      VARCHAR(64) NOT NULL,       -- SHA-1 = 40 car., SHA-256 = 64
+        commit_id      VARCHAR(64) NOT NULL,       
         status         pr_status NOT NULL,
         created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
         repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id)

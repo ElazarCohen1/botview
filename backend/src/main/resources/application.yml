@@ -1,4 +1,6 @@
 micronaut:
+  application:
+    name: codereview-backend
   server:
     port: 8080
   router:
@@ -7,3 +9,38 @@ micronaut:
         enabled: true
         mapping: /**
         paths: classpath:public
+  security:
+    authentication: cookie
+    redirect:
+      login-success: /
+      login-failure: /
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: ${JWT_SECRET}
+      cookie:
+        cookie-secure: false
+        cookie-same-site: Lax
+    intercept-url-map:
+      - pattern: /**
+        access: [isAnonymous()]
+    oauth2:
+      clients:
+        github:
+          client-id: ${GITHUB_CLIENT_ID}
+          client-secret: ${GITHUB_CLIENT_SECRET}
+          scopes: [user:email, read:user]
+          authorization:
+            url: https://github.com/login/oauth/authorize
+          token:
+            url: https://github.com/login/oauth/access_token
+            auth-method: client-secret-post
+
+datasources:
+  default:
+    url: jdbc:duckdb:../data/botview.duckdb
+    driver-class-name: org.duckdb.DuckDBDriver
+    dialect: ANSI
+    schema-generate: NONE
