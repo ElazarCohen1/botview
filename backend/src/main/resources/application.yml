@@ -40,7 +40,7 @@ micronaut:
 
 datasources:
   default:
-    url: jdbc:duckdb:../data/botview.duckdb
+    url: jdbc:duckdb:${DUCKDB_PATH}
     driver-class-name: org.duckdb.DuckDBDriver
     dialect: ANSI
     schema-generate: NONE
