@@ -1,8 +1,8 @@
 package fr.uge.controller;
 
-import fr.uge.enums.GitProvider;
+import fr.uge.git.GitProviderType;
 import fr.uge.model.PullRequest;
-import fr.uge.model.Repository;
+import fr.uge.git.model.RepositoryDto;
 import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
 
@@ -23,13 +23,13 @@ public class Requetes {
   }
 
   @Transactional
-  public List<Repository> getAllRep() throws SQLException {
+  public List<RepositoryDto> getAllRep() throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
       Statement stmt = conn.createStatement();
       ResultSet res = stmt.executeQuery("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT");
-      List<Repository> all_rep = new ArrayList<>();
+      List<RepositoryDto> all_rep = new ArrayList<>();
       while (res.next()) {
-        all_rep.add(new Repository(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProvider.valueOf(res.getString("plateforme")), res.getString("branche")));
+        all_rep.add(new RepositoryDto(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProviderType.valueOf(res.getString("plateforme")), res.getString("branche")));
       }
       return all_rep;
     }
@@ -49,7 +49,7 @@ public class Requetes {
   }
 
   @Transactional
-  public Repository getRep(int repId) throws SQLException {
+  public RepositoryDto getRep(int repId) throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT where rep_id = ?");
       stmt.setInt(1, repId);
@@ -57,7 +57,7 @@ public class Requetes {
       if (!res.next()) {
         return null;
       }
-      return new Repository(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProvider.valueOf(res.getString("plateforme")), res.getString("branche"));
+      return new RepositoryDto(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProviderType.valueOf(res.getString("plateforme")), res.getString("branche"));
     }
   }
 
