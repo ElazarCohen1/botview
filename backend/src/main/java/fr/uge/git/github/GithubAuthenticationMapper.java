@@ -1,6 +1,6 @@
-package fr.uge.mapper;
+package fr.uge.git.github;
 
-import fr.uge.model.GithubUser;
+import fr.uge.git.model.GitUserDto;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.http.HttpRequest;
@@ -39,7 +39,7 @@ public class GithubAuthenticationMapper implements OauthAuthenticationMapper {
     // Publishers result come after
     return Publishers.map(
             // GithubUser.class to transform json into the record GithubUser
-            client.retrieve(request, GithubUser.class),
+            client.retrieve(request, GitUserDto.class),
             user -> AuthenticationResponse.success(
                     user.login(),
                     List.of("ROLE_USER"),

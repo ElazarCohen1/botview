@@ -1,17 +1,19 @@
 package fr.uge.controller;
 
-import fr.uge.model.PullRequest;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 
 import java.util.Objects;
 
-@Controller("pullrequest")
-public class PullRequestController<Requetes> {
-  private final Requetes requetes;
+@Controller("/api/pullRequest")
+@Secured(SecurityRule.IS_AUTHENTICATED)
+public class PullRequestController<Request> {
+  private final Request request;
 
-  public PullRequestController(Requetes requetes) {
-    Objects.requireNonNull(requetes);
-    this.requetes = requetes;
+  public PullRequestController(Request request) {
+    Objects.requireNonNull(request);
+    this.request = request;
     super();
   }
 }
