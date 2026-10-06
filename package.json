@@ -8,8 +8,7 @@
     "dev:back": "cd backend && mvn mn:run",
     "dev:front": "cd frontend && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd frontend && npm run build && cd ../backend && mvn package",
-    "start": "java -jar backend/target/ton-app.jar"
+    "build": "cd frontend && npm run build && cd ../backend && mvn package"
   },
   "repository": {
     "type": "git",
