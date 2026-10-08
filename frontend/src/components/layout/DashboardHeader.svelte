@@ -1,5 +1,5 @@
 <script>
-    import { user } from '../../lib/stores.js';
+    import { user } from '../../lib/stores';
     import ProviderLoginButton from '../auth/ProviderLoginButton.svelte';
     import UserBadge from '../auth/UserBadge.svelte';
     import RepoSelector from '../repos/RepoSelector.svelte';

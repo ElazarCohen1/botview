@@ -1,5 +1,5 @@
 <script>
-    import { user } from '../lib/stores.js';
+    import { user } from '../lib/stores';
     import { connectedRepos, reviews } from '../lib/mock.js';
     import DashboardHeader from '../components/layout/DashboardHeader.svelte';
     import Section from '../components/common/Section.svelte';

@@ -33,7 +33,7 @@ github:
 
 datasources:
   default:
-    url: jdbc:duckdb:${DUCKDB_PATH}
+    url: jdbc:duckdb:../data/botview.duckdb
     driver-class-name: org.duckdb.DuckDBDriver
     dialect: ANSI
     schema-generate: NONE
