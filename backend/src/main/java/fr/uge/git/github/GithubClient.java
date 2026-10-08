@@ -1,5 +1,6 @@
 package fr.uge.git.github;
 
+import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import io.micronaut.context.annotation.Value;
@@ -48,5 +49,10 @@ public class GithubClient {
     return  client.retrieve(get("/user/repos", tokenToUse), Argument.listOf(GitRepoDto.class) );
   }
 
-  
+  public  List<GitPullRequestDto> getPullRequests(String repoName, String token){
+    String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
+    String owner = getUser(tokenToUse).login();
+    String path = "/repos/" + owner + "/" + repoName + "/pulls";
+    return  client.retrieve(get(path, tokenToUse), Argument.listOf(GitPullRequestDto.class) );
+  }
 }
