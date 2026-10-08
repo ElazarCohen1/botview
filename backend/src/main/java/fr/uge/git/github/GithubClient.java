@@ -26,6 +26,9 @@ public class GithubClient {
   }
 
   private HttpRequest<?> get(String path,String token) {
+    Objects.requireNonNull(path);
+    Objects.requireNonNull(token);
+
     return HttpRequest.GET(path)
             .header("Authorization", "Bearer " + token)
             .header("Accept", "application/vnd.github+json")

@@ -1,4 +1,4 @@
-package fr.uge.controller;
+package fr.uge.git.model;
 
 import java.util.Objects;
 
