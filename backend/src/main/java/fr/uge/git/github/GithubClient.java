@@ -1,13 +1,16 @@
 package fr.uge.git.github;
 
+import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import io.micronaut.context.annotation.Value;
+import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.BlockingHttpClient;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import jakarta.inject.Singleton;
 
+import java.util.List;
 import java.util.Objects;
 
 @Singleton
@@ -39,4 +42,11 @@ public class GithubClient {
     String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
     return client.retrieve(get("/user",tokenToUse),GitUserDto.class);
   }
+
+  public List<GitRepoDto> getRepos(String token){
+    String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
+    return  client.retrieve(get("/user/repos", tokenToUse), Argument.listOf(GitRepoDto.class) );
+  }
+
+  
 }
