@@ -5,9 +5,9 @@
   import Home from './pages/Home.svelte';
   import PullRequests from './pages/PullRequests.svelte';
   import Repositories from './pages/Repositories.svelte';
-
+  import Dashboard from './pages/Dashboard.svelte';
   const routes = {
-    '/': Home,
+    '/': Dashboard,
     '/repositories':Repositories,
     '/pull-requests': PullRequests,
     
@@ -28,6 +28,6 @@
   }
 
   :global(body) {
-    padding-top: 56px; /* hauteur de la navbar fixed-top */
+    padding-top: 56px;
   }
 </style>

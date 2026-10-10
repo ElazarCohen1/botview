@@ -11,7 +11,6 @@
             const res = await fetch('/api/user');
 
             if (res.ok) {
-                user = await res.json();
             }
         } catch (e) {
             console.error('Erreur réseau', e);
