@@ -23,7 +23,7 @@ public class RepoController {
 
     @Get
     public List<GitRepoDto> Repos(){
-        return  githubClient.getRepos(null);
+        return  githubClient.getRepos();
     }
 
 }

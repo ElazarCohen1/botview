@@ -24,7 +24,8 @@ public class PullRequestController<Request> {
 
   @Get("/{repo}")
   public List<GitPullRequestDto> pullRequests(String repo){
-    return githubClient.getPullRequests(repo,null);
+    Objects.requireNonNull(repo);
+    return githubClient.getPullRequests(repo);
   }
 
 }

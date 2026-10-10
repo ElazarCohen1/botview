@@ -1,10 +1,10 @@
 <script>
-    import { router  } from 'svelte-spa-router';
+    import { router } from "svelte-spa-router";
 
     const links = [
-        { href: '/', label: 'Dashboard' },
-        { href: '/repositories', label: 'Repositories' },
-        { href: '/settings', label: 'Paramètres' },
+        { href: "/", label: "Dashboard" },
+        { href: "/repositories", label: "Repositories" },
+        { href: "/settings", label: "Paramètres" },
     ];
 </script>
 
@@ -15,7 +15,11 @@
         <ul class="nav nav-pills flex-column">
             {#each links as { href, label }}
                 <li class="nav-item">
-                    <a class="nav-link" class:active={router.location === href} href="#{href}">
+                    <a
+                        class="nav-link"
+                        class:active={router.location === href}
+                        href="#{href}"
+                    >
                         {label}
                     </a>
                 </li>

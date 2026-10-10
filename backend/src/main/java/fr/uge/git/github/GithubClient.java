@@ -39,20 +39,18 @@ public class GithubClient {
             .header("User-Agent", "pr-review-bot");
   }
 
-  public GitUserDto getUser(String token){
-    String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
-    return client.retrieve(get("/user",tokenToUse),GitUserDto.class);
+  public GitUserDto getUser(){
+    return client.retrieve(get("/user",defaultToken),GitUserDto.class);
   }
 
-  public List<GitRepoDto> getRepos(String token){
-    String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
-    return  client.retrieve(get("/user/repos", tokenToUse), Argument.listOf(GitRepoDto.class) );
+  public List<GitRepoDto> getRepos(){
+    return  client.retrieve(get("/user/repos", defaultToken), Argument.listOf(GitRepoDto.class) );
   }
 
-  public  List<GitPullRequestDto> getPullRequests(String repoName, String token){
-    String tokenToUse = (token == null || token.isBlank())  ? defaultToken : token;
-    String owner = getUser(tokenToUse).login();
+  public  List<GitPullRequestDto> getPullRequests(String repoName){
+    Objects.requireNonNull(repoName);
+    String owner = getUser().login();
     String path = "/repos/" + owner + "/" + repoName + "/pulls";
-    return  client.retrieve(get(path, tokenToUse), Argument.listOf(GitPullRequestDto.class) );
+    return  client.retrieve(get(path, defaultToken), Argument.listOf(GitPullRequestDto.class) );
   }
 }

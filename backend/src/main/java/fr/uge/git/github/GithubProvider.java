@@ -12,11 +12,12 @@ public class GithubProvider implements GitProvider {
   public GithubProvider(GithubClient client){
       Objects.requireNonNull(client);
       this.client = client;
+      super();
   }
 
   @Override
   public GitUserDto getUser(String token){
-    return client.getUser(token);
+    return client.getUser();
   }
 
 
