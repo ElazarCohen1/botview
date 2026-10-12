@@ -7,14 +7,37 @@
     import EmptyState from '../components/common/EmptyState.svelte';
     import RepoCard from '../components/repos/RepoCard.svelte';
     import ReviewTable from '../components/reviews/ReviewTable.svelte';
+    import LoginForm from '../components/auth/LoginForm.svelte';
 
-    $: blocking = reviews.filter((r) => r.blocking).length;
+    let blocking = $derived(
+        reviews.filter((r) => r.blocking).length
+    );
+
+    let loginForms = $state([0]);
+    let nextId = $state(1);
+    let disabledAddFormButton = $derived(
+        loginForms.length >= 3
+    );
+
+    function addLoginForm() {
+        if(loginForms.length == 3){
+            return;
+        }
+        loginForms.push(nextId++);
+    }
 </script>
 
 <DashboardHeader />
 
 {#if !$user}
     <EmptyState icon="bi-plug" message="Connecte-toi à un provider Git pour commencer." />
+        {#each loginForms as id (id)}
+            <div class="mb-3">
+                <LoginForm onClickAdd = {addLoginForm} disabledAddFormButton = {disabledAddFormButton}/>
+            </div>
+        {/each}
+
+
 {:else}
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3"><StatCard label="Repos connectés" value={connectedRepos.length} icon="bi-git" /></div>

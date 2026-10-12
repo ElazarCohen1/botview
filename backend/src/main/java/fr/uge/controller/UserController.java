@@ -4,6 +4,7 @@ import fr.uge.git.GitProvider;
 import fr.uge.git.model.GitUserDto;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 

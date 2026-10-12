@@ -1,7 +1,7 @@
 <script lang="ts">
     import { providers } from '../../lib/mock.js';
     import { provider } from '../../lib/stores.js';
-    import type { GitUserDto } from '../../types/Gituser.js';
+    import type { GitUserDto } from '../../types/Git';
     import { login } from '../../api/login/login.js';
     import {user} from '../../lib/stores'
 
