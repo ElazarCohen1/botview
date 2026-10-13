@@ -17,6 +17,7 @@ public class UserController {
   public UserController(GitProvider gitProvider) {
     Objects.requireNonNull(gitProvider);
     this.gitProvider = gitProvider;
+    super();
   }
 
   @Get("/user")
