@@ -1,8 +1,15 @@
-<script>
-    export let label;
-    export let value;
-    export let icon = 'bi-bar-chart';
-    export let color = 'primary';
+<script lang="ts">
+    let {
+        label,
+        value,
+        icon = 'bi-bar-chart',
+        color = 'primary'
+    } = $props<{
+        label: string;
+        value: string | number;
+        icon?: string;
+        color?: string;
+    }>();
 </script>
 
 <div class="card h-100">

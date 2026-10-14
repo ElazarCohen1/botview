@@ -1,6 +1,11 @@
 <script lang="ts">
     import type { Repository } from "../../types/Repository";
-    export let repo: Repository;
+
+    let {
+        repo
+    } = $props<{
+        repo: Repository;
+    }>();
 </script>
 
 

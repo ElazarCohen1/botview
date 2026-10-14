@@ -1,6 +1,11 @@
-<script >
-    export let onClick;
-    export let text;
+<script lang="ts">
+    let {
+        onClick,
+        text
+    } = $props<{
+        onClick: () => void;
+        text: string;
+    }>();
 </script>
 
 

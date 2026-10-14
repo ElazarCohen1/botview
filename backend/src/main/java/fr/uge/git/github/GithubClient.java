@@ -3,6 +3,7 @@ package fr.uge.git.github;
 import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
+import fr.uge.git.model.WebHooksDto;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
@@ -52,5 +53,11 @@ public class GithubClient {
     String owner = getUser().login();
     String path = "/repos/" + owner + "/" + repoName + "/pulls";
     return  client.retrieve(get(path, defaultToken), Argument.listOf(GitPullRequestDto.class) );
+  }
+
+  public List<WebHooksDto> getWebHooks(String repoName){
+    String owner = getUser().login();
+    String path = "/repos/" + owner + "/" + repoName + "/hooks";
+    return client.retrieve(get(path, defaultToken), Argument.listOf(WebHooksDto.class));
   }
 }

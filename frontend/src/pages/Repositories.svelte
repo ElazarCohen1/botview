@@ -7,7 +7,6 @@
     let loading = $state(true);
     let error = $state("");
 
-
     async function refresh() {
         loading = true;
         error = "";
@@ -25,16 +24,15 @@
         }
     }
 
-
     onMount(async () => {
         refresh();
     });
+    async function addRepos() {}
 </script>
-
 
 <div>
     <h2>Dépots</h2>
-    <Button text="Rafraichir" onClick ={refresh} />
+    <Button text="Rafraichir" onClick={refresh} />
     {#if loading}
         <p>Chargement des dépôts...</p>
     {:else if error}
@@ -45,7 +43,8 @@
         <div class="alert alert-secondary">Aucun dépôt trouvé.</div>
     {:else}
         {#each repos as repo}
-            <RepositoryItem {repo}/>
+            <RepositoryItem {repo} />
+            <Button text="Ajouter" onClick={addRepos} />
         {/each}
     {/if}
 </div>

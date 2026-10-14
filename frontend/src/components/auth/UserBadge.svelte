@@ -8,7 +8,7 @@
         <div>{$user.login}</div>
         <span class="badge text-bg-secondary">{$provider}</span>
     </div>
-    <button class="btn btn-outline-secondary btn-sm ms-2" on:click={() => user.set(null)}>
+    <button class="btn btn-outline-secondary btn-sm ms-2" onclick={() => user.set(null)}>
         <i class="bi bi-box-arrow-right"></i>
     </button>
 </div>

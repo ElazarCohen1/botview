@@ -1,6 +1,11 @@
-    <script lang="ts">
+<script lang="ts">
     import type { PullRequest } from "../../types/PullRequest";
-    export let pr: PullRequest;
+
+    let {
+        pr
+    } = $props<{
+        pr: PullRequest;
+    }>();
 </script>
 <div class="card p-3 mb-3 shadow-sm">
     <h5 class="card-title text-primary">

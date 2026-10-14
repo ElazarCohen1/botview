@@ -1,6 +1,11 @@
-<script>
-    export let message;
-    export let icon = 'bi-inbox';
+<script lang="ts">
+    let {
+        message,
+        icon = 'bi-inbox'
+    } = $props<{
+        message: string;
+        icon?: string;
+    }>();
 </script>
 
 <div class="text-center text-body-secondary border rounded p-4">
