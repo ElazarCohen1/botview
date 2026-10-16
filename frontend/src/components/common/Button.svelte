@@ -1,7 +1,15 @@
-<script>
-    export let message  = '';
-    export let onClick;
-    export let style;
+<script lang="ts">
+    let {
+        message,
+        onClick,
+        style
+    }: {
+        message: string;
+        onClick : () => void;
+        style: string;
+    }
+    = $props();
+
 </script>
 
 <button onclick={onClick} class="btn btn-outline-primary btn-sm">
