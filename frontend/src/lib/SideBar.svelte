@@ -1,14 +1,10 @@
 <script>
-    import { router } from "svelte-spa-router";
+    import {router} from "svelte-spa-router";
 
     const links = [
-        { href: "/", label: "Dashboard", icon: "bi-speedometer2" },
-        {
-            href: "/repositories",
-            label: "Repositories",
-            icon: "bi-folder2-open",
-        },
-        { href: "/settings", label: "Paramètres", icon: "bi-gear" },
+        { href: "/", label: "Dashboard" },
+        { href: "/repositories", label: "Repositories" },
+        { href: "/settings", label: "Paramètres" },
     ];
 </script>
 

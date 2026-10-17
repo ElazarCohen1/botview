@@ -7,7 +7,7 @@
     <div class="lh-1">
         <div>{$user.login}</div>
     </div>
-    <button class="btn btn-outline-secondary btn-sm ms-2" onclick={() => user.set(null)}>
+    <button class="btn btn-outline-secondary btn-sm ms-2" on:click={() => user.set(null)}>
         <i class="bi bi-box-arrow-right"></i>
     </button>
 </div>

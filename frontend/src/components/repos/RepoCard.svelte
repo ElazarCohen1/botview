@@ -1,19 +1,6 @@
-<script lang="ts">
-    interface ConnectedRepo {
-        id?: number;
-        name: string;
-        origin?: string;
-        prCount?: number;
-        webhook?: string;
-    }
-
-    let {
-        repo
-    } = $props<{
-        repo: ConnectedRepo;
-    }>();
-
-    let webhookColor = $derived(repo.webhook === 'actif' ? 'success' : 'danger');
+<script>
+    export let repo;
+    $: webhookColor = repo.webhook === 'actif' ? 'success' : 'danger';
 </script>
 
 <div class="card h-100">
