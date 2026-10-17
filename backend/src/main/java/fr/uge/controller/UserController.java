@@ -26,7 +26,7 @@ public class UserController {
   public GitUserDto user(@QueryValue GitProviderType provider){
     Objects.requireNonNull(provider);
     GitProvider gitProvider = factoryProvider.getProvider(provider);
-    return gitProvider.getUser(gitProvider.getToken());
+    return gitProvider.getUser();
   }
 
 }
