@@ -1,6 +1,5 @@
 <script>
-    import { user } from '../../lib/stores';
-    import ProviderLoginButton from '../auth/ProviderLoginButton.svelte';
+    import {user} from '../../lib/stores';
     import UserBadge from '../auth/UserBadge.svelte';
     import RepoSelector from '../repos/RepoSelector.svelte';
 </script>
@@ -12,7 +11,7 @@
             <RepoSelector />
             <UserBadge />
         {:else}
-            <ProviderLoginButton />
+<!--            <ProviderLoginButton />-->
         {/if}
     </div>
 </div>

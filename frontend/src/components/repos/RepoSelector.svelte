@@ -1,5 +1,6 @@
 <script>
-    import { availableRepos } from '../../lib/mock.js';
+    import {availableRepos} from '../../lib/mock.js';
+
     let selected = '';
 </script>
 

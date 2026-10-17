@@ -5,4 +5,9 @@ import fr.uge.git.model.GitUserDto;
 
 public interface GitProvider {
   GitUserDto getUser(String token);
+
+  void saveToken(String token);
+
+  String getToken();
+
 }

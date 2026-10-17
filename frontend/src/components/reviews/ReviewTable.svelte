@@ -1,6 +1,7 @@
 <script>
-    import StatusBadge from "./StatusBadge.svelte";
-    import EmptyState from "../common/EmptyState.svelte";
+    import StatusBadge from './StatusBadge.svelte';
+    import EmptyState from '../common/EmptyState.svelte';
+
     export let reviews = [];
 </script>
 
