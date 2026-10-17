@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { user } from "../lib/stores";
     import { connectedRepos, reviews } from "../lib/mock.js";
     import DashboardHeader from "../components/layout/DashboardHeader.svelte";
     import Section from "../components/common/Section.svelte";
@@ -9,9 +8,9 @@
     import ReviewTable from "../components/reviews/ReviewTable.svelte";
     import LoginForm from "../components/auth/LoginForm.svelte";
     import ProviderSelectButton from "../components/common/ProviderSelectButton.svelte";
-
-    import { GitProvider } from "../types/Git";
-    import { getUser } from "../api/login/git";
+    import { auth } from "../lib/stores..svelte.js";
+    import { GitProviderEnum } from "../types/Git";
+    import { getUser } from "../api/login/gitApi";
 
     const MAX_FORMS = 3;
 
@@ -23,7 +22,7 @@
         reviews.filter((review) => review.blocking).length
     );
 
-    let connexionProvider = $state<GitProvider>(GitProvider.GITHUB);
+    let connexionProvider = $state<GitProviderEnum>(GitProviderEnum.GITHUB);
     let connecting = $state(false);
     let connectionError = $state("");
 
@@ -43,14 +42,13 @@
 
         try {
             const currentUser = await getUser(connexionProvider);
-
+            auth.setUser(currentUser);
             if (!currentUser) {
                 throw new Error(
                     "Impossible de récupérer l'utilisateur de ce provider."
                 );
             }
 
-            user.set(currentUser);
         } catch (e) {
             connectionError = e instanceof Error
                 ? e.message
@@ -63,7 +61,7 @@
 
 <DashboardHeader />
 
-{#if !$user}
+{#if !auth.isConnected}
     <EmptyState
             icon="bi-plug"
             message="Connecte-toi à un provider Git pour commencer."
