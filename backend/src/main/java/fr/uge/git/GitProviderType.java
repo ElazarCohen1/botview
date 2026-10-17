@@ -1,7 +1,7 @@
 package fr.uge.git;
 
 public enum GitProviderType {
-  GIT,
+  GITHUB,
   GITLAB,
   BITBUCKET
 }
