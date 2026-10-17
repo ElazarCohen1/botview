@@ -1,8 +1,8 @@
 import type { GitUserDto } from "../../types/Git";
-import { GitProvider } from "../../types/Git";
+import { GitProviderEnum } from "../../types/Git";
 
 export async function saveToken(
-    provider: GitProvider,
+    provider: GitProviderEnum,
     token: string
 ): Promise<void> {
     const res = await fetch("/api/token", {
