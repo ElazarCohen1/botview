@@ -1,8 +1,10 @@
 <script>
     export let status;
     const colors = {
-        'terminée': 'success', 'en cours': 'primary',
-        'en attente': 'secondary', 'échec': 'danger',
+        terminée: "success",
+        "en cours": "primary",
+        "en attente": "secondary",
+        échec: "danger",
     };
 </script>
 
