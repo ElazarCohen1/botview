@@ -4,7 +4,7 @@ export interface GitUserDto {
     avatar_url: string;
 }
 
-export enum GitProvider {
+export enum GitProviderEnum {
     GITHUB = "GITHUB",
     GITLAB= "GITLAB",
     BITBUCKET= "BITBUCKET",

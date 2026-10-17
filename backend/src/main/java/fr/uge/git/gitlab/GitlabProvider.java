@@ -9,7 +9,7 @@ public class GitlabProvider implements GitProvider {
   private String token ;
   
   @Override
-  public GitUserDto getUser(String token){
+  public GitUserDto getUser(){
     return new GitUserDto("",0,"null");
   }
 

@@ -18,7 +18,7 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public GitUserDto getUser(String token){
+  public GitUserDto getUser(){
     return client.getUser(token);
   }
 

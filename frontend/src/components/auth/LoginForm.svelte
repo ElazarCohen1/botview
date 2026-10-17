@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { GitProvider } from "../../types/Git";
-    import { saveToken } from "../../api/login/git";
+    import { GitProviderEnum } from "../../types/Git";
+    import { saveToken } from "../../api/login/gitApi";
     import ProviderSelectButton from "../common/ProviderSelectButton.svelte";
+    import { gitProvider } from "../../lib/stores..svelte";
 
     let {
         isFirst,
@@ -15,7 +16,7 @@
         onRemove: () => void;
     } = $props();
 
-    let provider = $state<GitProvider>(GitProvider.GITHUB);
+    let provider = $state<GitProviderEnum>(GitProviderEnum.GITHUB);
     let token = $state("");
     let loading = $state(false);
     let error = $state("");
@@ -30,6 +31,7 @@
 
         try {
             await saveToken(provider, token.trim());
+            gitProvider.select(provider);
 
             token = "";
             success = true;
