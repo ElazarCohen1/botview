@@ -8,18 +8,18 @@ import java.util.Objects;
 @Singleton
 public class GithubProvider implements GitProvider {
   private final GithubClient client;
-  private String token ;
+  private String token;
 
-  public GithubProvider(GithubClient client){
-      Objects.requireNonNull(client);
-      this.client = client;
-      this.token = "";
-      super();
+  public GithubProvider(GithubClient client) {
+    Objects.requireNonNull(client);
+    this.client = client;
+    this.token = "";
+    super();
   }
 
   @Override
-  public GitUserDto getUser(){
-    return client.getUser(token);
+  public GitUserDto getUser() {
+    return client.getUser();
   }
 
   @Override
@@ -31,6 +31,5 @@ public class GithubProvider implements GitProvider {
   public String getToken() {
     return token;
   }
-
 
 }

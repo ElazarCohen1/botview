@@ -2,13 +2,13 @@
     import { GitProviderEnum } from "../../types/Git";
     import { saveToken } from "../../api/login/gitApi";
     import ProviderSelectButton from "../common/ProviderSelectButton.svelte";
-    import { gitProvider } from "../../lib/stores..svelte";
+    import { gitProvider } from "../../lib/stores.svelte";
 
     let {
         isFirst,
         canAdd,
         onAdd,
-        onRemove
+        onRemove,
     }: {
         isFirst: boolean;
         canAdd: boolean;
@@ -40,47 +40,45 @@
                 success = false;
             }, 3000);
         } catch (e) {
-            error = e instanceof Error
-                ? e.message
-                : "Erreur lors de l'enregistrement du token.";
+            error =
+                e instanceof Error
+                    ? e.message
+                    : "Erreur lors de l'enregistrement du token.";
         } finally {
             loading = false;
         }
     }
 </script>
 
-<form
-        class="d-flex flex-column align-items-end"
-        onsubmit={submit}
->
+<form class="d-flex flex-column align-items-end" onsubmit={submit}>
     <div class="input-group">
         <ProviderSelectButton bind:bindValue={provider} />
 
         <input
-                type="password"
-                class="form-control"
-                style="width: 18rem"
-                placeholder="Token"
-                autocomplete="off"
-                bind:value={token}
-                disabled={loading}
-                required
+            type="password"
+            class="form-control"
+            style="width: 18rem"
+            placeholder="Token"
+            autocomplete="off"
+            bind:value={token}
+            disabled={loading}
+            required
         />
 
         <button
-                class="btn btn-primary"
-                type="submit"
-                disabled={loading || !token.trim()}
+            class="btn btn-primary"
+            type="submit"
+            disabled={loading || !token.trim()}
         >
             {loading ? "Ajout…" : "Ajouter le token"}
         </button>
 
         <button
-                type="button"
-                class="btn btn-outline-primary"
-                onclick={isFirst ? onAdd : onRemove}
-                disabled={isFirst && !canAdd}
-                aria-label={isFirst
+            type="button"
+            class="btn btn-outline-primary"
+            onclick={isFirst ? onAdd : onRemove}
+            disabled={isFirst && !canAdd}
+            aria-label={isFirst
                 ? "Ajouter un provider"
                 : "Supprimer ce provider"}
         >
