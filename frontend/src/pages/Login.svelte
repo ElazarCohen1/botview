@@ -3,9 +3,9 @@
     import EmptyState from '../components/common/EmptyState.svelte';
     import LoginForm from '../components/auth/LoginForm.svelte';
     import ProviderSelectButton from '../components/common/ProviderSelectButton.svelte';
-    import { auth } from '../lib/stores..svelte'
     import { GitProviderEnum } from '../types/Git';
     import { getUser } from '../api/login/gitApi';
+    import { auth } from '../lib/stores.svelte';
 
     const MAX_FORMS = 3;
 

@@ -2,7 +2,7 @@
     import { GitProviderEnum } from "../../types/Git";
     import { saveToken } from "../../api/login/gitApi";
     import ProviderSelectButton from "../common/ProviderSelectButton.svelte";
-    import { gitProvider } from "../../lib/stores..svelte";
+    import { gitProvider } from "../../lib/stores.svelte";
 
     let {
         isFirst,

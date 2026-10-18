@@ -3,7 +3,7 @@
   import NavBar from './lib/NavBar.svelte';
   import SideBar from './lib/SideBar.svelte';
   import { routes } from './route';
-  import { auth } from './lib/stores..svelte';
+  import { auth } from './lib/stores.svelte';
 
   function onConditionsFailed() {
     push('/login');

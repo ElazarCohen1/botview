@@ -1,7 +1,7 @@
 <script>
-    import { auth } from '../../lib/stores..svelte';
     import UserBadge from '../auth/UserBadge.svelte';
     import RepoSelector from '../repos/RepoSelector.svelte';
+    import { auth } from '../../lib/stores.svelte';
 </script>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
