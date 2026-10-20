@@ -1,8 +1,11 @@
 import type { Repository } from "../../types/Repository";
+import { GitProviderEnum } from "../../types/Git";
 
-export async function getRepositories(): Promise<Repository[] | undefined> {
+export async function getRepositories(
+    provider: GitProviderEnum = GitProviderEnum.GITHUB
+): Promise<Repository[] | undefined> {
     try {
-        const res = await fetch('/api/repositories');
+        const res = await fetch(`/api/repositories?provider=${encodeURIComponent(provider)}`);
 
         if (!res.ok) {
             throw new Error(`HTTP error: ${res.status}`);

@@ -1,8 +1,12 @@
 import type { WebHooks } from "../../types/WebHooks";
+import { GitProviderEnum } from "../../types/Git";
 
-export async function getWebHooks(repoName: string): Promise<WebHooks[] | undefined> {
+export async function getWebHooks(
+    repoName: string,
+    provider: GitProviderEnum = GitProviderEnum.GITHUB
+): Promise<WebHooks[] | undefined> {
     try {
-        const res = await fetch(`/api/hooks/${repoName}`);
+        const res = await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`);
 
         if (!res.ok) {
             throw new Error(`HTTP error: ${res.status}`);

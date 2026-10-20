@@ -8,7 +8,7 @@
 
     onMount(async () => {
         try {
-            const res = await fetch('/api/user');
+            const res = await fetch('/api/user?provider=GITHUB');
 
             if (res.ok) {
             }

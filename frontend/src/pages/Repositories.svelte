@@ -42,7 +42,7 @@
         refresh();
     });
     async function addRepos(repoName: string) {
-        await fetch(`/api/hooks/${repoName}`, { method: "POST" });
+        await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=GITHUB`, { method: "POST" });
         refresh();
     }
 </script>
