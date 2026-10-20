@@ -2,9 +2,6 @@ package fr.uge.controller;
 
 import fr.uge.git.GitProvider;
 import fr.uge.git.GitProviderFactory;
-import fr.uge.git.bitbucket.BitbucketProvider;
-import fr.uge.git.github.GithubProvider;
-import fr.uge.git.gitlab.GitlabProvider;
 import fr.uge.model.TokenRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
@@ -18,11 +15,10 @@ public class TokenController {
 
   private final GitProviderFactory factory;
 
-  public TokenController(
-          GitProviderFactory factory) {
-
+  public TokenController(GitProviderFactory factory) {
+    Objects.requireNonNull(factory);
     this.factory = factory;
-
+    super();
   }
   @Post
   public HttpResponse<?> saveToken(@Body TokenRequest request) {

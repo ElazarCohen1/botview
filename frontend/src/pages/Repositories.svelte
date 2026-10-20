@@ -13,9 +13,8 @@
         loading = true;
         error = "";
         try {
-
             const data = await getRepositories();
-            if (data ) {
+            if (data) {
                 repos = data;
             } else {
                 error = "Impossible de recuperer les depots";
@@ -27,12 +26,12 @@
         }
     }
 
-    function  hasPullRequestWebHook(webHooks){
-        if(!webHooks){
+    function hasPullRequestWebHook(webHooks) {
+        if (!webHooks) {
             return false;
         }
-        for(const hook of webHooks){
-            if(hook.events.includes("pull_request")) {
+        for (const hook of webHooks) {
+            if (hook.events.includes("pull_request")) {
                 return true;
             }
         }
@@ -42,7 +41,10 @@
     onMount(async () => {
         refresh();
     });
-    async function addRepos() {}
+    async function addRepos(repoName: string) {
+        await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=GITHUB`, { method: "POST" });
+        refresh();
+    }
 </script>
 
 <div>
@@ -58,20 +60,18 @@
         <div class="alert alert-secondary">Aucun dépôt trouvé.</div>
     {:else}
         {#each repos as repo}
-            {#await getWebHooks(repo.name)}
-            {:then dataWebhooks}
+            {#await getWebHooks(repo.name) then dataWebhooks}
                 {#if !hasPullRequestWebHook(dataWebhooks)}
-                <RepositoryItem {repo} />
-                <Button text="Ajouter" onClick={addRepos} />
+                    <RepositoryItem {repo} />
+                    <Button
+                        text="Ajouter"
+                        onClick={() => addRepos(repo.name)}
+                    />
                 {:else}
                     <RepositoryItem {repo} />
-                    <p> Vous avez deja un webhook</p>
+                    <p>Vous avez deja un webhook</p>
                 {/if}
-
-            {:catch  e}
-    {/await}
-
-
+            {/await}
         {/each}
     {/if}
 </div>

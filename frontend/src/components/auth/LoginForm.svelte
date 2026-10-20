@@ -49,10 +49,7 @@
     }
 </script>
 
-<form
-        class="d-flex flex-column align-items-end"
-        onsubmit={submit}
->
+<form class="d-flex flex-column align-items-end" onsubmit={submit}>
     <div class="input-group">
         <ProviderSelectButton bind:bindValue={provider} />
 
@@ -68,19 +65,19 @@
         />
 
         <button
-                class="btn btn-primary"
-                type="submit"
-                disabled={loading || !token.trim()}
+            class="btn btn-primary"
+            type="submit"
+            disabled={loading || !token.trim()}
         >
             {loading ? "Ajout…" : "Ajouter le token"}
         </button>
 
         <button
-                type="button"
-                class="btn btn-outline-primary"
-                onclick={isFirst ? onAdd : onRemove}
-                disabled={isFirst && !canAdd}
-                aria-label={isFirst
+            type="button"
+            class="btn btn-outline-primary"
+            onclick={isFirst ? onAdd : onRemove}
+            disabled={isFirst && !canAdd}
+            aria-label={isFirst
                 ? "Ajouter un provider"
                 : "Supprimer ce provider"}
         >

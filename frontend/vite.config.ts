@@ -10,6 +10,7 @@ export default defineConfig({
   },
 
   server: {
+    allowedHosts: ['upscale-sixfold-extruding.ngrok-free.dev'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

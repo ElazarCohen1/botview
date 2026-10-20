@@ -1,6 +1,6 @@
 import { wrap } from 'svelte-spa-router/wrap';
 import type { SvelteComponent } from 'svelte';
-import { auth } from './lib/stores.svelte';
+import { auth } from './lib/stores.svelte'
 
 import Login from './pages/Login.svelte';
 import Dashboard from './pages/Dashboard.svelte';

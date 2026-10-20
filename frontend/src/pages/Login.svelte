@@ -32,7 +32,7 @@
 
     async function login() {
         connecting = true;
-        connectionError = '';
+        connectionError = "";
         try {
             const currentUser = await getUser(connexionProvider);
             if (!currentUser) {
@@ -47,20 +47,23 @@
     }
 </script>
 
-<div class="container" >
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <h3 class="text-center mb-4">BotView</h3>
 
-            <EmptyState icon="bi-plug" message="Connecte-toi à un provider Git pour commencer." />
+            <EmptyState
+                icon="bi-plug"
+                message="Connecte-toi à un provider Git pour commencer."
+            />
 
             {#each loginForms as id, i (id)}
                 <div class="mb-3">
                     <LoginForm
-                            isFirst={i === 0}
-                            {canAdd}
-                            onAdd={addLoginForm}
-                            onRemove={() => removeLoginForm(id)}
+                        isFirst={i === 0}
+                        {canAdd}
+                        onAdd={addLoginForm}
+                        onRemove={() => removeLoginForm(id)}
                     />
                 </div>
             {/each}
@@ -73,7 +76,9 @@
             </div>
 
             {#if connectionError}
-                <div class="text-danger text-center mt-2" role="alert">{connectionError}</div>
+                <div class="text-danger text-center mt-2" role="alert">
+                    {connectionError}
+                </div>
             {/if}
         </div>
     </div>
