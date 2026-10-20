@@ -2,7 +2,6 @@ package fr.uge.controller;
 
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.GitProviderType;
-import fr.uge.git.github.GithubClient;
 import fr.uge.git.model.GitRepoDto;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -16,18 +15,18 @@ import java.util.Objects;
 @Controller("/api/repositories")
 @ExecuteOn(TaskExecutors.BLOCKING)
 public class RepoController {
-    private final GitProviderFactory Client;
+    private final GitProviderFactory factoryProvider;
 
-    public RepoController(GitProviderFactory client) {
-        Objects.requireNonNull(client);
-        this.Client = client;
+    public RepoController(GitProviderFactory factoryProvider) {
+        Objects.requireNonNull(factoryProvider);
+        this.factoryProvider = factoryProvider;
         super();
     }
 
     @Get
     public List<GitRepoDto> Repos(@QueryValue GitProviderType provider) {
         Objects.requireNonNull(provider);
-        return this.Client.getProvider(provider).getRepos();
+        return this.factoryProvider.getProvider(provider).getRepos();
     }
 
 }
