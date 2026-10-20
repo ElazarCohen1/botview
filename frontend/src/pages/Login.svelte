@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { push } from "svelte-spa-router";
-    import EmptyState from "../components/common/EmptyState.svelte";
-    import LoginForm from "../components/auth/LoginForm.svelte";
-    import ProviderSelectButton from "../components/common/ProviderSelectButton.svelte";
-    import { auth } from "../lib/stores.svelte";
-    import { GitProviderEnum } from "../types/Git";
-    import { getUser } from "../api/login/gitApi";
+    import { push } from 'svelte-spa-router';
+    import EmptyState from '../components/common/EmptyState.svelte';
+    import LoginForm from '../components/auth/LoginForm.svelte';
+    import ProviderSelectButton from '../components/common/ProviderSelectButton.svelte';
+    import { GitProviderEnum } from '../types/Git';
+    import { getUser } from '../api/login/gitApi';
+    import { auth } from '../lib/stores.svelte';
 
     const MAX_FORMS = 3;
 
@@ -15,11 +15,11 @@
 
     let connexionProvider = $state<GitProviderEnum>(GitProviderEnum.GITHUB);
     let connecting = $state(false);
-    let connectionError = $state("");
+    let connectionError = $state('');
 
     // Déjà connecté ? On ne reste pas sur /login
     $effect(() => {
-        if (auth.isConnected) push("/");
+        if (auth.isConnected) push('/');
     });
 
     function addLoginForm() {
@@ -36,14 +36,11 @@
         try {
             const currentUser = await getUser(connexionProvider);
             if (!currentUser) {
-                throw new Error(
-                    "Impossible de récupérer l'utilisateur de ce provider.",
-                );
+                throw new Error("Impossible de récupérer l'utilisateur de ce provider.");
             }
             auth.setUser(currentUser);
         } catch (e) {
-            connectionError =
-                e instanceof Error ? e.message : "Erreur lors de la connexion.";
+            connectionError = e instanceof Error ? e.message : 'Erreur lors de la connexion.';
         } finally {
             connecting = false;
         }
@@ -71,17 +68,10 @@
                 </div>
             {/each}
 
-            <div
-                class="d-flex justify-content-center align-items-center gap-2 mt-4"
-            >
+            <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
                 <ProviderSelectButton bind:bindValue={connexionProvider} />
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick={login}
-                    disabled={connecting}
-                >
-                    {connecting ? "Connexion…" : "Connexion"}
+                <button type="button" class="btn btn-primary" onclick={login} disabled={connecting}>
+                    {connecting ? 'Connexion…' : 'Connexion'}
                 </button>
             </div>
 
