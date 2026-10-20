@@ -1,6 +1,6 @@
 import { GitProviderEnum } from '../types/Git';
 
-let selectedProvider = $state<GitProvider | null>(null);
+let selectedProvider = $state<GitProviderEnum | null>(null);
 let currentUser = $state<GitUserDto | null>(null);
 
 export const gitProvider = {

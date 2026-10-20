@@ -25,6 +25,6 @@
     padding: 1.5rem;
   }
   :global(body) {
-    padding-top: 56px;
+    padding-top: 100px;
   }
 </style>
