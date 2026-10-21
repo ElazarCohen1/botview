@@ -4,16 +4,14 @@
     import { getWebHooks } from "../api/webhook/webHooks";
     import Button from "../components/button/Button.svelte";
     import RepositoryItem from "../components/repos/RepositoryItem.svelte";
-    import {getUser} from "../api/login/gitApi";
-    import {auth,gitProvider} from "../lib/stores.svelte";
-
-    let repos = $state([]);
+    import { getUser } from "../api/login/gitApi";
+    import { auth, gitProvider } from "../lib/stores.svelte";
+    import type { Repository } from "../types/Repository";
+    import type { WebHooks } from "../types/WebHooks";
+    let repos = $state<Repository[]>([]);
     let dataWebhooks = $state([]);
     let loading = $state(true);
     let error = $state("");
-
-
-
 
     async function refresh() {
         loading = true;
@@ -44,7 +42,7 @@
         refresh();
     });
 
-    function hasPullRequestWebHook(webHooks) {
+    function hasPullRequestWebHook(webHooks: WebHooks[] | undefined) {
         if (!webHooks) {
             return false;
         }
@@ -57,7 +55,10 @@
     }
 
     async function addRepos(repoName: string) {
-        await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=GITHUB`, { method: "POST" });
+        await fetch(
+            `/api/hooks/${encodeURIComponent(repoName)}?provider=GITHUB`,
+            { method: "POST" },
+        );
         refresh();
     }
 </script>

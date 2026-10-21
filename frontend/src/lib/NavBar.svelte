@@ -2,12 +2,13 @@
     import RepoSelector from "../components/repos/RepoSelector.svelte";
     import UserBadge from "../components/auth/UserBadge.svelte";
     import { auth, gitProvider } from "./stores.svelte";
-    import {GitProviderEnum} from "../types/Git.ts";
+    import { GitProviderEnum } from "../types/Git";
     import ProviderSelectButton from "../components/common/ProviderSelectButton.svelte";
     import { getUser } from "../api/login/gitApi";
 
-    let providerState = $state<GitProviderEnum>(gitProvider.selected ?? GitProviderEnum.GITHUB);
-
+    let providerState = $state<GitProviderEnum>(
+        gitProvider.selected ?? GitProviderEnum.GITHUB,
+    );
 
     $effect(() => {
         gitProvider.select(providerState);
@@ -37,7 +38,9 @@
     });
 </script>
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top border-bottom top-navbar">
+<nav
+    class="navbar navbar-expand-lg bg-body-tertiary fixed-top border-bottom top-navbar"
+>
     <div class="container-fluid gap-3 d-flex justify-content-end">
         <div class="d-flex flex-wrap align-items-center gap-3">
             {#if auth.isConnected}
@@ -45,7 +48,12 @@
                 <UserBadge />
             {/if}
         </div>
-        <a class="nav-link fs-5" href="#/settings" title="Paramètres" aria-label="Paramètres">
+        <a
+            class="nav-link fs-5"
+            href="#/settings"
+            title="Paramètres"
+            aria-label="Paramètres"
+        >
             ⚙<span class="visually-hidden">Paramètres</span>
         </a>
     </div>

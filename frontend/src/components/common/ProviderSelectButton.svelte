@@ -6,7 +6,7 @@
         bindValue: any;
     } = $props();
 
-    import {GitProviderEnum} from "../../types/Git.ts";
+    import {GitProviderEnum} from "../../types/Git";
 
 
 </script>

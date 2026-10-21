@@ -21,12 +21,12 @@
             return;
         }
 
-            const data = await getPullRequest(repoName) ;
-            if (data) {
-                pullRequests = data;
-            } else {
-                error = "Impossible de récupérer les Pull Requests.";
-            }
+        const data = await getPullRequest(repoName);
+        if (data) {
+            pullRequests = data;
+        } else {
+            error = "Impossible de récupérer les Pull Requests.";
+        }
         loading = false;
     });
 </script>
@@ -51,7 +51,7 @@
         </div>
     {:else}
         {#each pullRequests as pr}
-            <PullRequestItem {pr}/>
+            <PullRequestItem {pr} />
         {/each}
     {/if}
 </div>

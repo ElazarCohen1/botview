@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
     export let status;
-    const colors = {
+    const colors: Record<string, string> = {
         terminée: "success",
         "en cours": "primary",
         "en attente": "secondary",
