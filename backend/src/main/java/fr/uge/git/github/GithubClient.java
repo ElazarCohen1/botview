@@ -63,6 +63,13 @@ public class GithubClient {
     return client.retrieve(get(path, token), Argument.listOf(GitPullRequestDto.class));
   }
 
+  public  GitRepoDto getOneRepos(String repoName, String token){
+    Objects.requireNonNull(repoName);
+    Objects.requireNonNull(token);
+    String owner = getUser(token).login();
+    String path = "/repos/" + owner + "/" + repoName;
+    return client.retrieve(get(path, token), GitRepoDto.class);
+  }
   public List<WebHooksDto> getWebHooks(String repoName, String token) {
     Objects.requireNonNull(repoName);
     Objects.requireNonNull(token);

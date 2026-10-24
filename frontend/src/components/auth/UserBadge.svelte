@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { push } from 'svelte-spa-router';
-    import { auth } from '../../lib/stores..svelte';
+    import { push } from "svelte-spa-router";
+    import { auth } from "../../lib/stores.svelte";
 
     function logout() {
         auth.logout();

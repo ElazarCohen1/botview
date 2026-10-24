@@ -7,6 +7,7 @@ import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Singleton;
 
 import javax.sql.DataSource;
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +24,14 @@ public class Requetes {
   }
 
   @Transactional
-  public List<RepositoryDto> getAllRep() throws SQLException {
+  public List<RepositoryDto> getAllRep(GitProviderType provider) throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      Statement stmt = conn.createStatement();
-      ResultSet res = stmt.executeQuery("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT");
+      PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where origin = ?");
+      stmt.setString(1, provider.name());
       List<RepositoryDto> all_rep = new ArrayList<>();
+      ResultSet res = stmt.executeQuery();
       while (res.next()) {
-        all_rep.add(new RepositoryDto(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProviderType.valueOf(res.getString("plateforme")), res.getString("branche")));
+        all_rep.add(new RepositoryDto(res.getInt("id"), res.getString("name"), res.getString("url"), GitProviderType.valueOf(res.getString("origin"))));
       }
       return all_rep;
     }
@@ -51,14 +53,25 @@ public class Requetes {
   @Transactional
   public RepositoryDto getRep(int repId) throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      PreparedStatement stmt = conn.prepareStatement("SELECT rep_id, nom, url, plateforme, branche from REPO_GIT where rep_id = ?");
+      PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where id = ?");
       stmt.setInt(1, repId);
       ResultSet res = stmt.executeQuery();
       if (!res.next()) {
         return null;
       }
-      return new RepositoryDto(res.getInt("rep_id"), res.getString("nom"), res.getString("url"), GitProviderType.valueOf(res.getString("plateforme")), res.getString("branche"));
+      return new RepositoryDto(res.getInt("id"), res.getString("name"), res.getString("url"), GitProviderType.valueOf(res.getString("origin")));
     }
+  }
+
+  @Transactional
+  public void addRepo(String name, String url, GitProviderType provider) throws SQLException{
+    try (Connection conn = dataSource.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement("INSERT INTO REPOSITORY (name,url,origin) VALUES ( ?, ?, ? )");
+      stmt.setString(1, name);
+      stmt.setString(2, url);
+      stmt.setString(3, provider.name());
+      stmt.execute();
+      }
   }
 
   @Transactional
@@ -74,5 +87,3 @@ public class Requetes {
     }
   }
 }
-// changer les nom et mettre expli
-// java doc

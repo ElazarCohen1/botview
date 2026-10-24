@@ -60,4 +60,11 @@ public class GithubProvider implements GitProvider {
     return client.createWebhook(repoName, this.token);
   }
 
+  @Override
+  public GitRepoDto getOneRepos(String repoName){
+    Objects.requireNonNull(repoName);
+    return client.getOneRepos(repoName, this.token);
+  }
+
+
 }

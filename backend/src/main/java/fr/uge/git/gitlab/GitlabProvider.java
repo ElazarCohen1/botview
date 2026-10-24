@@ -47,5 +47,7 @@ public class GitlabProvider implements GitProvider {
     return  null;
   }
 
+  @Override
+  public GitRepoDto getOneRepos(String repoName){return null;}
 
 }

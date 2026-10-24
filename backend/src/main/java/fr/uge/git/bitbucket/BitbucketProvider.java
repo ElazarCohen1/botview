@@ -47,6 +47,7 @@ public class BitbucketProvider implements GitProvider {
   public WebHooksDto createWebhook (String repoName){
     return  null;
   }
-
+  @Override
+  public GitRepoDto getOneRepos(String repoName){return null;}
 
 }
