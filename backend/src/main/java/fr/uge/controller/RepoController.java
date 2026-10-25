@@ -1,5 +1,6 @@
 package fr.uge.controller;
 
+import fr.uge.database.Database;
 import fr.uge.git.GitProvider;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.GitProviderType;
@@ -22,11 +23,11 @@ import java.util.Objects;
 @ExecuteOn(TaskExecutors.BLOCKING)
 public class RepoController {
     private final GitProviderFactory factoryProvider;
-    private final  Requetes requetes;
-    public RepoController(GitProviderFactory factoryProvider, Requetes requetes) {
+    private final Database db;
+    public RepoController(GitProviderFactory factoryProvider, Database database) {
         Objects.requireNonNull(factoryProvider);
-        Objects.requireNonNull(requetes);
-        this.requetes = requetes;
+        Objects.requireNonNull(database);
+        this.db = database;
         this.factoryProvider = factoryProvider;
         super();
     }
@@ -40,7 +41,7 @@ public class RepoController {
     @Get("/database")
     public List<RepositoryDto> getAllReposFromDb(@QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
-        return  requetes.getAllRep(provider);
+        return  db.getRepositoryQueries().getAllRep(provider);
     }
 
     @Post("/database/addrepo/{repo}")
@@ -48,7 +49,7 @@ public class RepoController {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
         GitRepoDto repository = factoryProvider.getProvider(provider).getOneRepos(repo);
-        requetes.addRepo(repository.name(),repository.htmlUrl(),provider);
+        db.getRepositoryQueries().addRepo(repository.name(),repository.htmlUrl(),provider);
         return HttpResponse.ok();
     }
 }
