@@ -7,10 +7,7 @@ import fr.uge.git.GitProviderType;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.RepositoryDto;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 
@@ -42,6 +39,14 @@ public class RepoController {
     public List<RepositoryDto> getAllReposFromDb(@QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
         return  db.getRepositoryQueries().getAllRep(provider);
+    }
+
+    @Delete("/database/delete/{repo}")
+    public HttpResponse<?> deleteRepoDataBase(String repo,@QueryValue GitProviderType provider) throws SQLException{
+        Objects.requireNonNull(repo);
+        Objects.requireNonNull(provider);
+        db.getRepositoryQueries().deleteRepo(repo,provider);
+        return  HttpResponse.ok();
     }
 
     @Post("/database/addrepo/{repo}")

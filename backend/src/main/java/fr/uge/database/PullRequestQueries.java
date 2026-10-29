@@ -19,11 +19,17 @@ public class PullRequestQueries {
         super();
     }
 
+    /**
+     * Gets eveery pull requests from the database
+     *
+     * @return a list of all stored pull requests in datadbase
+     * @throws SQLException if there is database error
+     */
     @Transactional
     public List<PullRequest> getAllPr() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             Statement stmt = conn.createStatement();
-            ResultSet res = stmt.executeQuery("SELECT pull_id, commentaire, name, date from PULL_REQUEST");
+            ResultSet res = stmt.executeQuery("SELECT id, name, created_at from PULL_REQUEST");
             List<PullRequest> all_rep = new ArrayList<>();
             while (res.next()) {
                 all_rep.add(new PullRequest(res.getInt("pull_id"), res.getString("commentaire"), res.getString("name"), res.getTimestamp("date").toInstant()));
@@ -32,10 +38,17 @@ public class PullRequestQueries {
         }
     }
 
+    /**
+     * Get a specific pull request from the database
+     *
+     * @param prId id of the pull request by its identifier
+     * @return the pull request
+     * @throws SQLException if there is database error
+     */
     @Transactional
     public PullRequest getPr(int prId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT pull_id, commentaire, name, date from PULL_REQUEST where pull_id = ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT id, name, created_at from PULL_REQUEST where id = ?");
             stmt.setInt(1, prId);
             ResultSet res = stmt.executeQuery();
             if (!res.next()) {

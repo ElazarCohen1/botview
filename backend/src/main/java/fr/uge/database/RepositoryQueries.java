@@ -1,5 +1,6 @@
 package fr.uge.database;
 
+import fr.uge.git.GitProvider;
 import fr.uge.git.GitProviderType;
 import fr.uge.git.model.RepositoryDto;
 import io.micronaut.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class RepositoryQueries {
         super();
     }
 
+
     @Transactional
     public RepositoryDto getRep(int repId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -37,8 +39,19 @@ public class RepositoryQueries {
         }
     }
 
+    /**
+     * Inserts a repository inside the database
+     *
+     * @param name the name of repository
+     * @param url the URL(web) of the repository
+     * @param provider Git provider type ( can be for example : GITLAB, GITHUB, BITBUCKET)
+     * @throws SQLException if there is database error
+     */
     @Transactional
     public void addRepo(String name, String url, GitProviderType provider) throws SQLException{
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(url);
+        Objects.requireNonNull(provider);
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO REPOSITORY (name,url,origin) VALUES ( ?, ?, ? )");
             stmt.setString(1, name);
@@ -48,8 +61,35 @@ public class RepositoryQueries {
         }
     }
 
+    /**
+     * Delete a repository from the database
+     *
+     * @param name the name of repository
+     * @param provider Git provider type ( can be for example : GITLAB, GITHUB, BITBUCKET)
+     * @throws SQLException if there is database error
+     */
+    @Transactional
+    public  void deleteRepo(String name, GitProviderType provider) throws SQLException{
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(provider);
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM REPOSITORY WHERE name = ? and origin = ?");
+            stmt.setString(1, name);
+            stmt.setString(2, provider.name());
+            stmt.execute();
+        }
+    }
+
+    /**
+     * Gets every repository from a Git provider
+     *
+     * @param provider Git provider type ( can be for example : GITLAB, GITHUB, BITBUCKET)
+     * @return a list of repositories specific to the provider
+     * @throws SQLException if there is database error
+     */
     @Transactional
     public List<RepositoryDto> getAllRep(GitProviderType provider) throws SQLException {
+        Objects.requireNonNull(provider);
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where origin = ?");
             stmt.setString(1, provider.name());

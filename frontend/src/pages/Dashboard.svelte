@@ -1,12 +1,18 @@
 <script lang="ts">
-    import { connectedRepos, reviews } from '../lib/mock.js';
+    import { reviews } from '../lib/mock.js';
+    import { onMount } from 'svelte';
+    import { getRepositoriesFromDb } from '../api/repositories/repositories';
     import DashboardHeader from '../components/layout/DashboardHeader.svelte';
     import Section from '../components/common/Section.svelte';
     import StatCard from '../components/common/StatCard.svelte';
     import EmptyState from '../components/common/EmptyState.svelte';
     import RepoCard from '../components/repos/RepoCard.svelte';
     import ReviewTable from '../components/reviews/ReviewTable.svelte';
-
+    let connectedRepos = $state([]);
+    onMount(async () => {
+        const data = await getRepositoriesFromDb();
+        connectedRepos = data ?? [];
+    });
     let blocking = $derived(reviews.filter((r) => r.blocking).length);
 </script>
 

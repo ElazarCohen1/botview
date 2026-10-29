@@ -5,7 +5,11 @@
     import RepositoryItem from "../components/repos/RepositoryItem.svelte";
     import EmptyState from "../components/common/EmptyState.svelte";
     import { getWebHooks, createWebHook } from "../api/webhook/webHooks";
-    import { getRepositoriesFromDb, addRepositoryToDb } from "../api/repositories/repositories";
+    import {
+        getRepositoriesFromDb,
+        addRepositoryToDb,
+        deleteRepositoryFromDb,
+    } from "../api/repositories/repositories";
 
     let selectedRepoName = $state("");
     let chosenRepos = $state([]);
@@ -33,6 +37,10 @@
         await addRepositoryToDb(selectedRepoName);
         await refresh();
     }
+    async function removeRepo(repoName: string) {
+        await deleteRepositoryFromDb(repoName);
+        await refresh();
+    }
 
     onMount(refresh);
 </script>
@@ -45,23 +53,36 @@
         <RepoSelect bind:bindValue={selectedRepoName} />
         <Button text="Ajouter à la liste" onClick={addSelectedRepo} />
     </div>
-        <h4 class="mt-4 mb-3">Dépôts choisis ({chosenRepos.length})</h4>
-        {#if loading && chosenRepos.length === 0}
-            <p>Chargement...</p>
-        {:else if chosenRepos.length === 0}
-            <EmptyState message="Aucun dépôt affiché pour le moment. Choisissez-en un ci-dessus pour l'ajouter." />
-        {:else}
-            {#each chosenRepos as repo}
-                {#await getWebHooks(repo.name) then dataWebhooks}
-                    <div class="mb-3">
-                        <RepositoryItem {repo} />
-                        {#if !hasPullRequestWebHook(dataWebhooks)}
-                            <Button text="Ajouter Webhook" onClick={() => addWebhook(repo.name)} />
-                        {:else}
-                            <p class="text-success mt-2">Vous avez déjà un webhook</p>
-                        {/if}
-                    </div>
-                {/await}
-            {/each}
-        {/if}
-    </div>
+    <h4 class="mt-4 mb-3">Dépôts choisis ({chosenRepos.length})</h4>
+    {#if loading && chosenRepos.length === 0}
+        <p>Chargement...</p>
+    {:else if chosenRepos.length === 0}
+        <EmptyState
+            message="Aucun dépôt affiché pour le moment. Choisissez-en un ci-dessus pour l'ajouter."
+        />
+    {:else}
+        {#each chosenRepos as repo}
+            {#await getWebHooks(repo.name) then dataWebhooks}
+                <div class="mb-3">
+                    <RepositoryItem {repo} />
+                    {#if !hasPullRequestWebHook(dataWebhooks)}
+                        <Button
+                            text="Ajouter Webhook"
+                            onClick={() => addWebhook(repo.name)}
+                        />
+                    {:else}
+                        <p class="text-success mt-2">
+                            Vous avez déjà un webhook
+                        </p>
+                    {/if}
+                    <button
+                        class="btn btn-sm btn-outline-danger"
+                        onclick={() => removeRepo(repo.name)}
+                    >
+                        Supprimer de la liste
+                    </button>
+                </div>
+            {/await}
+        {/each}
+    {/if}
+</div>

@@ -53,3 +53,19 @@ export async function addRepositoryToDb(
         return false;
     }
 }
+
+export async function deleteRepositoryFromDb(
+    repoName: string,
+    provider: GitProviderEnum = GitProviderEnum.GITHUB
+): Promise<boolean> {
+    try {
+        const res = await fetch(
+            `/api/repositories/database/delete/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`,
+            { method: "DELETE" }
+        );
+        return res.ok;
+    } catch (e) {
+        console.error("error :", e);
+        return false;
+    }
+}
