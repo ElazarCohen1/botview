@@ -1,6 +1,6 @@
 micronaut:
   application:
-    name: codereview-backend
+    name: botView
 
   server:
     port: 8080
@@ -31,9 +31,16 @@ micronaut:
 github:
   token: ${GITHUB_TOKEN:}
 
+ngrok:
+  enabled: true
+
+llm:
+  model-url: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+  model-path: ${LLM_MODEL_PATH:./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf}
+
 datasources:
   default:
-    url: jdbc:duckdb:../data/botview.duckdb
+    url: jdbc:duckdb:${db.path:./data/botview.duckdb}
     driver-class-name: org.duckdb.DuckDBDriver
     dialect: ANSI
     schema-generate: NONE

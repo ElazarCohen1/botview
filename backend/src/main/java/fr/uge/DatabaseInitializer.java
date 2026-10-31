@@ -85,7 +85,7 @@ public class DatabaseInitializer {
       CREATE TABLE IF NOT EXISTS PULL_REQUEST (
         id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
         name           VARCHAR(255) NOT NULL,
-        commit_id      VARCHAR(64) NOT NULL,       
+        commit_id      VARCHAR(64) NOT NULL,
         status         pr_status NOT NULL,
         created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
         repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id)
@@ -104,7 +104,7 @@ public class DatabaseInitializer {
     stmt.execute("""
       CREATE TABLE IF NOT EXISTS ANALYSIS (
         id          INTEGER PRIMARY KEY DEFAULT nextval('analysis_seq'),
-        tool        VARCHAR(100) NOT NULL,         -- ex : checkstyle, spotbugs, llm
+        tool        VARCHAR(100) NOT NULL,
         result      TEXT,
         status      analysis_status NOT NULL,
         created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
