@@ -34,6 +34,10 @@ github:
 ngrok:
   enabled: true
 
+llm:
+  model-url: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+  model-path: ${LLM_MODEL_PATH:./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf}
+
 datasources:
   default:
     url: jdbc:duckdb:${db.path:./data/botview.duckdb}

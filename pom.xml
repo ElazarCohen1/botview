@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,28 +15,21 @@
     <groupId>fr.uge</groupId>
     <artifactId>codereview-backend</artifactId>
     <version>0.1</version>
-    <packaging>${packaging}</packaging>
+    <packaging>jar</packaging>
 
     <properties>
-        <packaging>jar</packaging>
         <jdk.version>27</jdk.version>
         <release.version>27</release.version>
-        <micronaut.version>5.1.5</micronaut.version>
+
         <micronaut.aot.enabled>false</micronaut.aot.enabled>
         <micronaut.aot.packageName>fr.uge.aot.generated</micronaut.aot.packageName>
         <micronaut.runtime>netty</micronaut.runtime>
+
         <exec.mainClass>fr.uge.Application</exec.mainClass>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
-
-    <!-- Dépendances du backend conservées -->
     <dependencies>
+
         <dependency>
             <groupId>com.ngrok</groupId>
             <artifactId>ngrok-java</artifactId>
@@ -50,45 +45,66 @@
         </dependency>
 
         <dependency>
+            <groupId>de.kherud</groupId>
+            <artifactId>llama</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-http-client</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-http-server-netty</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>io.micronaut.data</groupId>
             <artifactId>micronaut-data-jdbc</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>io.micronaut.serde</groupId>
             <artifactId>micronaut-serde-jackson</artifactId>
-            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.micronaut.sql</groupId>
             <artifactId>micronaut-jdbc-hikari</artifactId>
-            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.duckdb</groupId>
+            <artifactId>duckdb_jdbc</artifactId>
+            <version>1.5.5.1</version>
         </dependency>
 
         <dependency>
             <groupId>io.micronaut.validation</groupId>
             <artifactId>micronaut-validation</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micronaut.security</groupId>
+            <artifactId>micronaut-security-jwt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -115,27 +131,12 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.duckdb</groupId>
-            <artifactId>duckdb_jdbc</artifactId>
-            <version>1.5.5.1</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micronaut.security</groupId>
-            <artifactId>micronaut-security-jwt</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
+
         <sourceDirectory>${project.basedir}/backend/src/main/java</sourceDirectory>
+
         <testSourceDirectory>${project.basedir}/backend/src/test/java</testSourceDirectory>
 
         <resources>
@@ -171,6 +172,7 @@
                 </configuration>
 
                 <executions>
+
                     <execution>
                         <id>install-node-and-npm</id>
                         <phase>generate-resources</phase>
@@ -204,15 +206,17 @@
                             <arguments>run build</arguments>
                         </configuration>
                     </execution>
+
                 </executions>
             </plugin>
 
-            <!-- 2. Configuration Micronaut conservée -->
             <plugin>
                 <groupId>io.micronaut.maven</groupId>
                 <artifactId>micronaut-maven-plugin</artifactId>
+
                 <configuration>
-                    <configFile>${project.basedir}/backend/aot-${packaging}.properties</configFile>
+                    <configFile>${project.basedir}/backend/aot-jar.properties</configFile>
+
                     <configurationValidation>
                         <enabled>false</enabled>
                         <suppressions>
@@ -236,8 +240,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+
                 <configuration>
+
                     <annotationProcessorPaths combine.self="override">
+
                         <path>
                             <groupId>io.micronaut</groupId>
                             <artifactId>micronaut-inject-java</artifactId>
@@ -291,12 +298,14 @@
                                 </exclusion>
                             </exclusions>
                         </path>
+
                     </annotationProcessorPaths>
 
                     <compilerArgs>
                         <arg>-Amicronaut.processing.group=fr.uge</arg>
                         <arg>-Amicronaut.processing.module=codereview-backend</arg>
                     </compilerArgs>
+
                 </configuration>
             </plugin>
 
@@ -304,11 +313,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
+
                 <executions>
                     <execution>
                         <id>create-data-dir</id>
                         <phase>initialize</phase>
-                        <goals><goal>run</goal></goals>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                         <configuration>
                             <target>
                                 <mkdir dir="${project.basedir}/data"/>
@@ -319,6 +331,7 @@
             </plugin>
 
         </plugins>
+
     </build>
 
 </project>
