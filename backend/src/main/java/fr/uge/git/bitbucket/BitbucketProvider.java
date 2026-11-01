@@ -30,7 +30,7 @@ public class BitbucketProvider implements GitProvider {
   }
 
   @Override
-  public List<GitRepoDto> getRepos(){
+  public List<GitRepoDto> getRepositories(){
     return List.of();
   }
   @Override
@@ -47,6 +47,7 @@ public class BitbucketProvider implements GitProvider {
   public WebHooksDto createWebhook (String repoName){
     return  null;
   }
-
+  @Override
+  public GitRepoDto getRepository(String repoName){return null;}
 
 }

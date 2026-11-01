@@ -20,10 +20,11 @@ public class UserController {
   public UserController(GitProviderFactory factoryProvider) {
     Objects.requireNonNull(factoryProvider);
     this.factoryProvider = factoryProvider;
+    super();
   }
 
   @Get("/user")
-  public GitUserDto user(@QueryValue GitProviderType provider){
+  public GitUserDto getUser(@QueryValue GitProviderType provider) {
     Objects.requireNonNull(provider);
     GitProvider gitProvider = factoryProvider.getProvider(provider);
     return gitProvider.getUser();

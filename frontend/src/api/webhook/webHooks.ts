@@ -20,3 +20,17 @@ export async function getWebHooks(
         return undefined;
     }
 }
+export async function createWebHook(
+    repoName: string,
+    provider: GitProviderEnum = GitProviderEnum.GITHUB
+): Promise<boolean> {
+    try {
+        const res = await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`, {
+            method: "POST"
+        });
+        return res.ok;
+    } catch (e) {
+        console.error("error :", e);
+        return false;
+    }
+}

@@ -1,92 +1,87 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { getRepositories } from "../api/repositories/repositories";
-    import { getWebHooks } from "../api/webhook/webHooks";
     import Button from "../components/button/Button.svelte";
+    import RepoSelect from "../components/common/RepoSelect.svelte";
     import RepositoryItem from "../components/repos/RepositoryItem.svelte";
-    import { getUser } from "../api/login/gitApi";
-    import { auth, gitProvider } from "../lib/stores.svelte";
-    import type { Repository } from "../types/Repository";
-    import type { WebHooks } from "../types/WebHooks";
-    let repos = $state<Repository[]>([]);
-    let dataWebhooks = $state([]);
+    import EmptyState from "../components/common/EmptyState.svelte";
+    import { getWebHooks, createWebHook } from "../api/webhook/webHooks";
+    import {
+        getRepositoriesFromDb,
+        addRepositoryToDb,
+        deleteRepositoryFromDb,
+    } from "../api/repositories/repositories";
+
+    let selectedRepoName = $state("");
+    let chosenRepos = $state([]);
     let loading = $state(true);
-    let error = $state("");
 
     async function refresh() {
         loading = true;
-        error = "";
-        try {
-            const data = await getRepositories();
-            if (data) {
-                repos = data;
-            } else {
-                error = "Impossible de recuperer les depots";
-            }
-        } catch (e) {
-            error = "Impossible de contacter le serveur";
-        } finally {
-            loading = false;
+        const data = await getRepositoriesFromDb();
+        if (data && data.length > 0) {
+            chosenRepos = data;
         }
+        loading = false;
+    }
+    function hasPullRequestWebHook(webHooks) {
+        if (!webHooks) return false;
+        return webHooks.some((hook) => hook.events?.includes("pull_request"));
+    }
+    async function addWebhook(repoName: string) {
+        await createWebHook(repoName);
+        await refresh();
+    }
+    async function addSelectedRepo() {
+        if (!selectedRepoName) return;
+        await createWebHook(selectedRepoName);
+        await addRepositoryToDb(selectedRepoName);
+        await refresh();
+    }
+    async function removeRepo(repoName: string) {
+        await deleteRepositoryFromDb(repoName);
+        await refresh();
     }
 
-    $effect(() => {
-        const provider = gitProvider.selected;
-
-        if (provider === null) {
-            repos = [];
-            loading = false;
-            return;
-        }
-
-        refresh();
-    });
-
-    function hasPullRequestWebHook(webHooks: WebHooks[] | undefined) {
-        if (!webHooks) {
-            return false;
-        }
-        for (const hook of webHooks) {
-            if (hook.events.includes("pull_request")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    async function addRepos(repoName: string) {
-        await fetch(
-            `/api/hooks/${encodeURIComponent(repoName)}?provider=GITHUB`,
-            { method: "POST" },
-        );
-        refresh();
-    }
+    onMount(refresh);
 </script>
 
 <div>
-    <h2>Dépots</h2>
-    <Button text="Rafraichir" onClick={refresh} />
-    {#if loading}
-        <p>Chargement des dépôts...</p>
-    {:else if error}
-        <div class="alert alert-danger">
-            {error}
-        </div>
-    {:else if repos.length === 0}
-        <div class="alert alert-secondary">Aucun dépôt trouvé.</div>
+    <h2>Mes Dépôts</h2>
+
+    <div class="d-flex align-items-center gap-3 my-4">
+        <label for="repo-select" class="fw-semibold">Choisir un dépôt :</label>
+        <RepoSelect bind:bindValue={selectedRepoName} />
+        <Button text="Ajouter à la liste" onClick={addSelectedRepo} />
+    </div>
+    <h4 class="mt-4 mb-3">Dépôts choisis ({chosenRepos.length})</h4>
+    {#if loading && chosenRepos.length === 0}
+        <p>Chargement...</p>
+    {:else if chosenRepos.length === 0}
+        <EmptyState
+            message="Aucun dépôt affiché pour le moment. Choisissez-en un ci-dessus pour l'ajouter."
+        />
     {:else}
-        {#each repos as repo}
+        {#each chosenRepos as repo}
             {#await getWebHooks(repo.name) then dataWebhooks}
-                {#if !hasPullRequestWebHook(dataWebhooks)}
+                <div class="mb-3">
                     <RepositoryItem {repo} />
-                    <Button
-                        text="Ajouter"
-                        onClick={() => addRepos(repo.name)}
-                    />
-                {:else}
-                    <RepositoryItem {repo} />
-                    <p>Vous avez deja un webhook</p>
-                {/if}
+                    {#if !hasPullRequestWebHook(dataWebhooks)}
+                        <Button
+                            text="Ajouter Webhook"
+                            onClick={() => addWebhook(repo.name)}
+                        />
+                    {:else}
+                        <p class="text-success mt-2">
+                            Vous avez déjà un webhook
+                        </p>
+                    {/if}
+                    <button
+                        class="btn btn-sm btn-outline-danger"
+                        onclick={() => removeRepo(repo.name)}
+                    >
+                        Supprimer de la liste
+                    </button>
+                </div>
             {/await}
         {/each}
     {/if}

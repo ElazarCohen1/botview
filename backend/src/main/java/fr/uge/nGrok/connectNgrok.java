@@ -22,7 +22,7 @@ public class connectNgrok {
                     .forward(new URI("http://localhost:8080").toURL());
          IO.println("Available at: " + forwarder.getUrl());
         } catch (Exception e) {
-            throw new IOException("error initialing the ngrok",e);
+            throw new IOException("error initialing the ngrok", e);
         }
     }
 }

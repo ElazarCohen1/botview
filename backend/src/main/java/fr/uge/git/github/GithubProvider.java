@@ -38,8 +38,8 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public List<GitRepoDto> getRepos() {
-    return client.getRepos(this.token);
+  public List<GitRepoDto> getRepositories() {
+    return client.getRepositories(this.token);
   }
 
   @Override
@@ -58,6 +58,12 @@ public class GithubProvider implements GitProvider {
   public WebHooksDto createWebhook(String repoName) {
     Objects.requireNonNull(repoName);
     return client.createWebhook(repoName, this.token);
+  }
+
+  @Override
+  public GitRepoDto getRepository(String repoName) {
+    Objects.requireNonNull(repoName);
+    return client.getRepository(repoName, this.token);
   }
 
 }

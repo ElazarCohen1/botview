@@ -1,7 +1,8 @@
 node_modules
 .idea
 .env
-data
+*.duckdb
+data/
 botview.iml
 models
 target

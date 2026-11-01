@@ -169,6 +169,7 @@
                 <configuration>
                     <workingDirectory>${project.basedir}/frontend</workingDirectory>
                     <installDirectory>${project.build.directory}/frontend</installDirectory>
+                    <skip>true</skip>
                 </configuration>
 
                 <executions>

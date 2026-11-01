@@ -29,7 +29,7 @@ public class GitlabProvider implements GitProvider {
   }
 
   @Override
-  public List<GitRepoDto> getRepos(){
+  public List<GitRepoDto> getRepositories(){
     return List.of();
   }
   @Override
@@ -47,5 +47,7 @@ public class GitlabProvider implements GitProvider {
     return  null;
   }
 
+  @Override
+  public GitRepoDto getRepository(String repoName){return null;}
 
 }

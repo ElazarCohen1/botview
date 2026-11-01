@@ -11,7 +11,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 
 import java.util.Objects;
-
+@Requires(notEnv = "test")
 @Context
 @Singleton
 @Requires(notEnv = "test")
