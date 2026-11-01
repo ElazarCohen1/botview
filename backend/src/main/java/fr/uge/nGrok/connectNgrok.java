@@ -19,10 +19,10 @@ public class connectNgrok {
           var session = Session.withAuthtokenFromEnv().connect();
           forwarder = session.httpEndpoint()
                     .domain("upscale-sixfold-extruding.ngrok-free.dev")
-                    .forward(new URI("http://localhost:5173").toURL());
+                    .forward(new URI("http://localhost:8080").toURL());
          IO.println("Available at: " + forwarder.getUrl());
         } catch (Exception e) {
-            throw new IOException("error initialing the ngrok");
+            throw new IOException("error initialing the ngrok",e);
         }
     }
 }
