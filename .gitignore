@@ -5,3 +5,4 @@ data
 botview.iml
 models
 target
+backend/src/main/resources/public/
