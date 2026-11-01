@@ -3,3 +3,7 @@ node_modules
 .env
 *.duckdb
 data/
+botview.iml
+models
+target
+backend/src/main/resources/public/

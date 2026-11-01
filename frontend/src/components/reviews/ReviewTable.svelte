@@ -1,8 +1,8 @@
-<script>
-    import StatusBadge from './StatusBadge.svelte';
-    import EmptyState from '../common/EmptyState.svelte';
+<script lang="ts">
+    import StatusBadge from "./StatusBadge.svelte";
+    import EmptyState from "../common/EmptyState.svelte";
 
-    export let reviews = [];
+    export let reviews: any[] = [];
 </script>
 
 {#if reviews.length === 0}
@@ -11,21 +11,27 @@
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
-            <tr><th>PR</th><th>Repo</th><th>Statut</th><th>Commentaires</th><th>Date</th></tr>
+                <tr
+                    ><th>PR</th><th>Repo</th><th>Statut</th><th>Commentaires</th
+                    ><th>Date</th></tr
+                >
             </thead>
             <tbody>
-            {#each reviews as r (r.id)}
-                <tr>
-                    <td>
-                        {r.pr}
-                        {#if r.blocking}<span class="badge text-bg-danger ms-1">bloquante</span>{/if}
-                    </td>
-                    <td>{r.repo}</td>
-                    <td><StatusBadge status={r.status} /></td>
-                    <td>{r.comments}</td>
-                    <td>{r.date}</td>
-                </tr>
-            {/each}
+                {#each reviews as r (r.id)}
+                    <tr>
+                        <td>
+                            {r.pr}
+                            {#if r.blocking}<span
+                                    class="badge text-bg-danger ms-1"
+                                    >bloquante</span
+                                >{/if}
+                        </td>
+                        <td>{r.repo}</td>
+                        <td><StatusBadge status={r.status} /></td>
+                        <td>{r.comments}</td>
+                        <td>{r.date}</td>
+                    </tr>
+                {/each}
             </tbody>
         </table>
     </div>

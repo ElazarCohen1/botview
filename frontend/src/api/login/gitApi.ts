@@ -20,7 +20,7 @@ export async function saveToken(
 }
 
 export async function getUser(
-    provider: GitProvider
+    provider: GitProviderEnum
 ): Promise<GitUserDto> {
     const res = await fetch(
         `/api/user?provider=${encodeURIComponent(provider)}`,

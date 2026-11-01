@@ -6,8 +6,8 @@ import Login from './pages/Login.svelte';
 import Dashboard from './pages/Dashboard.svelte';
 import Repositories from './pages/Repositories.svelte';
 import PullRequests from './pages/PullRequests.svelte';
+import Settings from './pages/Settings.svelte';
 
-// Condition : on n'accède à la page que si on est connecté
 const requireAuth = () => auth.isConnected;
 
 const guarded = (component: any) =>
@@ -18,5 +18,6 @@ export const routes = {
     '/': guarded(Dashboard),
     '/repositories': guarded(Repositories),
     '/pull-requests': guarded(PullRequests),
+    '/settings': guarded(Settings),
     '*': guarded(Dashboard),
 };

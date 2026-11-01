@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently -n back,front -c blue,green \"npm run dev:back\" \"npm run dev:front\"",
-    "dev:back": "cd backend && mvn mn:run",
+    "dev:back": "mvn mn:run",
     "dev:front": "cd frontend && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd frontend && npm run build && cd ../backend && mvn package"
+    "build": "cd frontend && npm run build && mvn package"
   },
   "repository": {
     "type": "git",

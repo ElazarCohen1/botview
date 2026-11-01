@@ -17,7 +17,11 @@
         class="rounded-circle"
     />
     <div>{auth.user?.login}</div>
-    <button class="btn btn-outline-secondary btn-sm ms-2" onclick={logout}>
+    <button
+        class="btn btn-outline-secondary btn-sm ms-2"
+        onclick={logout}
+        aria-label="Se déconnecter"
+    >
         <i class="bi bi-box-arrow-right"></i>
     </button>
 </div>

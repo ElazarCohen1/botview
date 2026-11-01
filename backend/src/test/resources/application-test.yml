@@ -1,0 +1,10 @@
+ngrok:
+  enabled: false
+
+datasources:
+  default:
+    url:
+      jdbc:duckdb::memory:
+    driver-class-name: org.duckdb.DuckDBDriver
+    dialect: ANSI
+    schema-generate: NONE
