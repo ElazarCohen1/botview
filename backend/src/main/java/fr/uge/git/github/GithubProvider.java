@@ -38,8 +38,8 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public List<GitRepoDto> getRepos() {
-    return client.getRepos(this.token);
+  public List<GitRepoDto> getRepositories() {
+    return client.getRepositories(this.token);
   }
 
   @Override
@@ -61,10 +61,9 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public GitRepoDto getOneRepos(String repoName){
+  public GitRepoDto getRepository(String repoName) {
     Objects.requireNonNull(repoName);
-    return client.getOneRepos(repoName, this.token);
+    return client.getRepository(repoName, this.token);
   }
-
 
 }

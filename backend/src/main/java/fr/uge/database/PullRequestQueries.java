@@ -13,7 +13,8 @@ import java.util.Objects;
 @Singleton
 public class PullRequestQueries {
     private final DataSource dataSource;
-    public PullRequestQueries(DataSource dataSource){
+
+    public PullRequestQueries(DataSource dataSource) {
         Objects.requireNonNull(dataSource);
         this.dataSource = dataSource;
         super();
@@ -26,15 +27,16 @@ public class PullRequestQueries {
      * @throws SQLException if there is database error
      */
     @Transactional
-    public List<PullRequest> getAllPr() throws SQLException {
+    public List<PullRequest> getAllPullRequest() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             Statement stmt = conn.createStatement();
             ResultSet res = stmt.executeQuery("SELECT id, name, created_at from PULL_REQUEST");
-            List<PullRequest> all_rep = new ArrayList<>();
+            List<PullRequest> pullRequests = new ArrayList<>();
             while (res.next()) {
-                all_rep.add(new PullRequest(res.getInt("pull_id"), res.getString("commentaire"), res.getString("name"), res.getTimestamp("date").toInstant()));
+                pullRequests.add(new PullRequest(res.getInt("id"), res.getString("name"),
+                        res.getTimestamp("created_at").toInstant()));
             }
-            return all_rep;
+            return pullRequests;
         }
     }
 
@@ -46,15 +48,17 @@ public class PullRequestQueries {
      * @throws SQLException if there is database error
      */
     @Transactional
-    public PullRequest getPr(int prId) throws SQLException {
+    public PullRequest getPullRequest(int prId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT id, name, created_at from PULL_REQUEST where id = ?");
+            PreparedStatement stmt = conn
+                    .prepareStatement("SELECT id, name, created_at from PULL_REQUEST where id = ?");
             stmt.setInt(1, prId);
             ResultSet res = stmt.executeQuery();
             if (!res.next()) {
                 return null;
             }
-            return new PullRequest(res.getInt("pull_id"), res.getString("commentaire"), res.getString("name"), res.getTimestamp("date").toInstant());
+            return new PullRequest(res.getInt("id"), res.getString("name"),
+                    res.getTimestamp("created_at").toInstant());
         }
     }
 }

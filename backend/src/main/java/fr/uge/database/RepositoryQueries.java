@@ -27,7 +27,7 @@ public class RepositoryQueries {
 
 
     @Transactional
-    public RepositoryDto getRep(int repId) throws SQLException {
+    public RepositoryDto getRepository(int repId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where id = ?");
             stmt.setInt(1, repId);
@@ -48,7 +48,7 @@ public class RepositoryQueries {
      * @throws SQLException if there is database error
      */
     @Transactional
-    public void addRepo(String name, String url, GitProviderType provider) throws SQLException{
+    public void addRepository(String name, String url, GitProviderType provider) throws SQLException{
         Objects.requireNonNull(name);
         Objects.requireNonNull(url);
         Objects.requireNonNull(provider);
@@ -69,7 +69,7 @@ public class RepositoryQueries {
      * @throws SQLException if there is database error
      */
     @Transactional
-    public  void deleteRepo(String name, GitProviderType provider) throws SQLException{
+    public  void deleteRepository(String name, GitProviderType provider) throws SQLException{
         Objects.requireNonNull(name);
         Objects.requireNonNull(provider);
         try (Connection conn = dataSource.getConnection()) {
@@ -88,7 +88,7 @@ public class RepositoryQueries {
      * @throws SQLException if there is database error
      */
     @Transactional
-    public List<RepositoryDto> getAllRep(GitProviderType provider) throws SQLException {
+    public List<RepositoryDto> getAllRepositories(GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where origin = ?");

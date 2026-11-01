@@ -18,13 +18,13 @@ public interface GitProvider {
 
   String getToken();
 
-  List<GitRepoDto> getRepos();
+  List<GitRepoDto> getRepositories();
   List<GitPullRequestDto> getPullRequests(String repoName);
 
   List<WebHooksDto> getWebHooks(String repoName);
 
   WebHooksDto createWebhook (String repoName);
 
-  GitRepoDto getOneRepos(String repoName);
+  GitRepoDto getRepository(String repoName);
 
 }

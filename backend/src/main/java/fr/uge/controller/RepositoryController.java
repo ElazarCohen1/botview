@@ -1,7 +1,6 @@
 package fr.uge.controller;
 
 import fr.uge.database.Database;
-import fr.uge.git.GitProvider;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.GitProviderType;
 import fr.uge.git.model.GitRepoDto;
@@ -11,17 +10,16 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 
-import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
 @Controller("/api/repositories")
 @ExecuteOn(TaskExecutors.BLOCKING)
-public class RepoController {
+public class RepositoryController {
     private final GitProviderFactory factoryProvider;
     private final Database db;
-    public RepoController(GitProviderFactory factoryProvider, Database database) {
+    public RepositoryController(GitProviderFactory factoryProvider, Database database) {
         Objects.requireNonNull(factoryProvider);
         Objects.requireNonNull(database);
         this.db = database;
@@ -30,31 +28,31 @@ public class RepoController {
     }
 
     @Get
-    public List<GitRepoDto> getRepos(@QueryValue GitProviderType provider) {
+    public List<GitRepoDto> getRepositories(@QueryValue GitProviderType provider) {
         Objects.requireNonNull(provider);
-        return this.factoryProvider.getProvider(provider).getRepos();
+        return this.factoryProvider.getProvider(provider).getRepositories();
     }
 
-    @Get("/database")
-    public List<RepositoryDto> getAllReposFromDb(@QueryValue GitProviderType provider) throws SQLException {
+    @Get("/registered")
+    public List<RepositoryDto> getRegisteredRepositories(@QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
-        return  db.getRepositoryQueries().getAllRep(provider);
+        return  db.getRepositoryQueries().getAllRepositories(provider);
     }
 
-    @Delete("/database/delete/{repo}")
-    public HttpResponse<?> deleteRepoDataBase(String repo,@QueryValue GitProviderType provider) throws SQLException{
+    @Delete("/{repo}")
+    public HttpResponse<?> deleteRepository(String repo,@QueryValue GitProviderType provider) throws SQLException{
         Objects.requireNonNull(repo);
         Objects.requireNonNull(provider);
-        db.getRepositoryQueries().deleteRepo(repo,provider);
+        db.getRepositoryQueries().deleteRepository(repo,provider);
         return  HttpResponse.ok();
     }
 
-    @Post("/database/addrepo/{repo}")
-    public HttpResponse<?> addRepoToDataBase(String repo,@QueryValue GitProviderType provider) throws SQLException{
+    @Post("/{repo}")
+    public HttpResponse<?> addRepository(String repo,@QueryValue GitProviderType provider) throws SQLException{
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
-        GitRepoDto repository = factoryProvider.getProvider(provider).getOneRepos(repo);
-        db.getRepositoryQueries().addRepo(repository.name(),repository.htmlUrl(),provider);
+        GitRepoDto repository = factoryProvider.getProvider(provider).getRepository(repo);
+        db.getRepositoryQueries().addRepository(repository.name(),repository.htmlUrl(),provider);
         return HttpResponse.ok();
     }
 }

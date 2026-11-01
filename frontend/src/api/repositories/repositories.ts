@@ -24,7 +24,7 @@ export async function getRepositoriesFromDb(
     provider: GitProviderEnum = GitProviderEnum.GITHUB
 ): Promise<Repository[] | undefined> {
     try {
-        const res = await fetch(`/api/repositories/database?provider=${encodeURIComponent(provider)}`);
+        const res = await fetch(`/api/repositories/registered?provider=${encodeURIComponent(provider)}`);
 
         if (!res.ok) {
             throw new Error(`HTTP error: ${res.status}`);
@@ -44,7 +44,7 @@ export async function addRepositoryToDb(
     provider: GitProviderEnum = GitProviderEnum.GITHUB
 ): Promise<boolean> {
     try {
-        const res = await fetch(`/api/repositories/database/addrepo/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`, {
+        const res = await fetch(`/api/repositories/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`, {
             method: "POST"
         });
         return res.ok;
@@ -60,7 +60,7 @@ export async function deleteRepositoryFromDb(
 ): Promise<boolean> {
     try {
         const res = await fetch(
-            `/api/repositories/database/delete/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`,
+            `/api/repositories/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`,
             { method: "DELETE" }
         );
         return res.ok;
