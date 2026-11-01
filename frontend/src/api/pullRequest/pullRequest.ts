@@ -6,7 +6,7 @@ export async function getPullRequest(
     provider: GitProviderEnum = GitProviderEnum.GITHUB
 ): Promise<PullRequest[] | undefined> {
     try {
-        const res = await fetch(`/api/pullRequest/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`);
+        const res = await fetch(`/api/pullrequest/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`);
 
         if (!res.ok) {
             throw new Error(`HTTP error: ${res.status}`);

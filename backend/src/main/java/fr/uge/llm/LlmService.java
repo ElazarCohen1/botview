@@ -3,6 +3,7 @@ package fr.uge.llm;
 import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
 import io.micronaut.context.annotation.Context;
+import io.micronaut.context.annotation.Requires;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
@@ -10,7 +11,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 
 import java.util.Objects;
-
+@Requires(notEnv = "test")
 @Context
 @Singleton
 public class LlmService {
