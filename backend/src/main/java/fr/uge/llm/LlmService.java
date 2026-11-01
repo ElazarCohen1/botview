@@ -18,7 +18,7 @@ import java.util.Objects;
 public class LlmService {
   // value get the value from the application.yml
   private final LlmInitialiser initialiser;
-
+  private Thread loaderThread;
   public LlmService(LlmInitialiser initialiser){
     this.initialiser = initialiser;
     super();
@@ -26,7 +26,7 @@ public class LlmService {
 
   @PostConstruct
   void init() {
-    Thread.ofPlatform().start(()->{
+    loaderThread =  Thread.ofPlatform().daemon().start(()->{
       try {
         initialiser.initialiseModel();
       } catch (IOException | InterruptedException e) {
@@ -49,18 +49,10 @@ public class LlmService {
 
   @PreDestroy
   void close() {
-   IO.println("PREDESTROY START");
-
-    try {
-      var model = initialiser.getModel();
-      IO.println("MODEL RETRIEVED");
-      model.close();
-      IO.println("MODEL CLOSED");
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+    if (loaderThread != null) {
+      loaderThread.interrupt();
     }
-
-    IO.println("PREDESTROY END");
+    initialiser.shutdown();
   }
 
 }

@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LlmInitialiser {
   private enum Status{
-    NOT_INITIALIZED, LOADING, READY, FAILED
+    NOT_INITIALIZED, LOADING, READY, FAILED,CLOSED
   }
 
   private final ReentrantLock lock;
@@ -57,6 +57,10 @@ public class LlmInitialiser {
 
       lock.lock();
       try {
+        if (status == Status.CLOSED) {
+          loadedModel.close();
+          return;
+        }
         model = loadedModel;
         status = Status.READY;
         condition.signalAll();
@@ -66,6 +70,10 @@ public class LlmInitialiser {
     }catch (IOException | InterruptedException e){
       lock.lock();
       try {
+        if (status != Status.CLOSED) {
+          initializationError = e;
+          status = Status.FAILED;
+        }
         initializationError = e;
         status = Status.FAILED;
         condition.signalAll();
@@ -75,6 +83,23 @@ public class LlmInitialiser {
       throw e;
     }
   }
+
+  public void shutdown() {
+    LlamaModel toClose;
+    lock.lock();
+    try {
+      status = Status.CLOSED;
+      toClose = model;
+      model = null;
+      condition.signalAll();
+    } finally {
+      lock.unlock();
+    }
+    if (toClose != null) {
+      toClose.close();
+    }
+  }
+
 
 
   public void initialiseModel() throws IOException, InterruptedException {
@@ -101,15 +126,11 @@ public class LlmInitialiser {
 
         condition.await();
       }
-
-      if (status == Status.FAILED) {
-        throw new IllegalStateException(
-                "Le chargement du modèle a échoué",
-                initializationError
-        );
-      }
-
-      return model;
+      return switch (status) {
+        case FAILED -> throw new IllegalStateException("Le chargement du modèle a échoué", initializationError);
+        case CLOSED -> throw new IllegalStateException("Le service LLM est arrêté");
+        default -> model;
+      };
 
     } finally {
       lock.unlock();
