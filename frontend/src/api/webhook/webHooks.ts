@@ -6,7 +6,7 @@ export async function getWebHooks(
     provider: GitProviderEnum = GitProviderEnum.GITHUB
 ): Promise<WebHooks[] | undefined> {
     try {
-        const res = await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`);
+        const res = await fetch(`/api/hooks/${repoName}?provider=${provider}`);
 
         if (!res.ok) {
             throw new Error(`HTTP error: ${res.status}`);
@@ -25,7 +25,7 @@ export async function createWebHook(
     provider: GitProviderEnum = GitProviderEnum.GITHUB
 ): Promise<boolean> {
     try {
-        const res = await fetch(`/api/hooks/${encodeURIComponent(repoName)}?provider=${encodeURIComponent(provider)}`, {
+        const res = await fetch(`/api/hooks/${repoName}?provider=${provider}`, {
             method: "POST"
         });
         return res.ok;

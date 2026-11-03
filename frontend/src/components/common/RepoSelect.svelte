@@ -11,14 +11,15 @@
         if (data && data.length > 0) {
             repos = data;
             if (!bindValue) {
-                bindValue = data[0].name;
+                bindValue = data[0].full_name || data[0].name;
             }
         }
     });
 </script>
+
 <select class="form-select" style="width: 22rem" bind:value={bindValue}>
     <option value="" disabled>Choisir un repo…</option>
     {#each repos as r}
-        <option value={r.name}>{r.name}</option>
+        <option value={r.full_name || r.name}>{r.full_name || r.name}</option>
     {/each}
 </select>

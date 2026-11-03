@@ -55,35 +55,31 @@ public class GithubClient {
     return client.retrieve(get("/user/repos", token), Argument.listOf(GitRepoDto.class));
   }
 
-  public List<GitPullRequestDto> getPullRequests(String repoName, String token) {
-    Objects.requireNonNull(repoName);
+  public List<GitPullRequestDto> getPullRequests(String repoFullName, String token) {
+    Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
-    String owner = getUser(token).login();
-    String path = "/repos/" + owner + "/" + repoName + "/pulls";
+    String path = "/repos/" + repoFullName + "/pulls";
     return client.retrieve(get(path, token), Argument.listOf(GitPullRequestDto.class));
   }
 
-  public GitRepoDto getRepository(String repoName, String token) {
-    Objects.requireNonNull(repoName);
+  public GitRepoDto getRepository(String repoFullName, String token) {
+    Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
-    String owner = getUser(token).login();
-    String path = "/repos/" + owner + "/" + repoName;
+    String path = "/repos/" + repoFullName;
     return client.retrieve(get(path, token), GitRepoDto.class);
   }
 
-  public List<WebHooksDto> getWebHooks(String repoName, String token) {
-    Objects.requireNonNull(repoName);
+  public List<WebHooksDto> getWebHooks(String repoFullName, String token) {
+    Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
-    String owner = getUser(token).login();
-    String path = "/repos/" + owner + "/" + repoName + "/hooks";
+    String path = "/repos/" + repoFullName + "/hooks";
     return client.retrieve(get(path, token), Argument.listOf(WebHooksDto.class));
   }
 
   public WebHooksDto createWebhook(String repoName, String token) {
     Objects.requireNonNull(repoName);
     Objects.requireNonNull(token);
-    String owner = getUser(token).login();
-    String path = "/repos/" + owner + "/" + repoName + "/hooks";
+    String path = "/repos/" + repoName + "/hooks";
     Map<String, Object> body = Map.of(
         "name", "web",
         "active", true,

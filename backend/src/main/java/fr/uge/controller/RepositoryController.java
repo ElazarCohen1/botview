@@ -19,6 +19,7 @@ import java.util.Objects;
 public class RepositoryController {
     private final GitProviderFactory factoryProvider;
     private final Database db;
+
     public RepositoryController(GitProviderFactory factoryProvider, Database database) {
         Objects.requireNonNull(factoryProvider);
         Objects.requireNonNull(database);
@@ -36,23 +37,23 @@ public class RepositoryController {
     @Get("/registered")
     public List<RepositoryDto> getRegisteredRepositories(@QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
-        return  db.getRepositoryQueries().getAllRepositories(provider);
+        return db.getRepositoryQueries().getAllRepositories(provider);
     }
 
-    @Delete("/{repo}")
-    public HttpResponse<?> deleteRepository(String repo,@QueryValue GitProviderType provider) throws SQLException{
+    @Delete("/{+repo}")
+    public HttpResponse<?> deleteRepository(String repo, @QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(repo);
         Objects.requireNonNull(provider);
-        db.getRepositoryQueries().deleteRepository(repo,provider);
-        return  HttpResponse.ok();
+        db.getRepositoryQueries().deleteRepository(repo, provider);
+        return HttpResponse.ok();
     }
 
-    @Post("/{repo}")
-    public HttpResponse<?> addRepository(String repo,@QueryValue GitProviderType provider) throws SQLException{
+    @Post("/{+repo}")
+    public HttpResponse<?> addRepository(String repo, @QueryValue GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
         GitRepoDto repository = factoryProvider.getProvider(provider).getRepository(repo);
-        db.getRepositoryQueries().addRepository(repository.name(),repository.htmlUrl(),provider);
+        db.getRepositoryQueries().addRepository(repository.fullName(), repository.htmlUrl(), provider);
         return HttpResponse.ok();
     }
 }

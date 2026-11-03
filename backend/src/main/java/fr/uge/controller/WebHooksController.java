@@ -11,6 +11,7 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 
@@ -25,15 +26,26 @@ public class WebHooksController {
         super();
     }
 
-    @Post("/{repo}")
+    @Post("/{+repo}")
     public HttpResponse<?> createWebHook(String repo, @QueryValue GitProviderType provider) {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
-        factoryProvider.getProvider(provider).createWebhook(repo);
-        return HttpResponse.ok();
+        try{
+            factoryProvider.getProvider(provider).createWebhook(repo);
+            return HttpResponse.ok();
+        }catch(HttpClientResponseException e){
+            if(e.getStatus().getCode() == 404){
+                IO.println("Probleme avec token");
+            }else{
+                IO.println("Probleme autre");
+
+            }
+            return HttpResponse.badRequest();
+        }
+
     }
 
-    @Get("/{repo}")
+    @Get("/{+repo}")
     public List<WebHooksDto> getWebHooks(String repo, @QueryValue GitProviderType provider) {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
@@ -45,6 +57,5 @@ public class WebHooksController {
         IO.println("Pull_request");
         return HttpResponse.ok();
     }
-
 
 }
