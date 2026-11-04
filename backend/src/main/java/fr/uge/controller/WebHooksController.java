@@ -30,17 +30,11 @@ public class WebHooksController {
     public HttpResponse<?> createWebHook(String repo, @QueryValue GitProviderType provider) {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(repo);
-        try{
+        try {
             factoryProvider.getProvider(provider).createWebhook(repo);
             return HttpResponse.ok();
-        }catch(HttpClientResponseException e){
-            if(e.getStatus().getCode() == 404){
-                IO.println("Probleme avec token");
-            }else{
-                IO.println("Probleme autre");
-
-            }
-            return HttpResponse.badRequest();
+        } catch (HttpClientResponseException e) {
+            return HttpResponse.badRequest(String.valueOf(e.getMessage()) );
         }
 
     }

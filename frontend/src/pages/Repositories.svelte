@@ -13,8 +13,8 @@
 
     let selectedRepoName = $state("");
     let chosenRepos = $state([]);
+    let resMessage = $state("");
     let loading = $state(true);
-
     async function refresh() {
         loading = true;
         const data = await getRepositoriesFromDb();
@@ -28,13 +28,21 @@
         return webHooks.some((hook) => hook.events?.includes("pull_request"));
     }
     async function addWebhook(repoName: string) {
-        await createWebHook(repoName);
+        resMessage = "";
+        const res = await createWebHook(repoName);
+        if (!res.ok) {
+            resMessage = res.error || "Erreur inconnue";
+        }
         await refresh();
     }
     async function addSelectedRepo() {
         if (!selectedRepoName) return;
-        await createWebHook(selectedRepoName);
+        resMessage = "";
         await addRepositoryToDb(selectedRepoName);
+        const res = await createWebHook(selectedRepoName);
+        if (!res.ok) {
+            resMessage = res.error || "Erreur inconnue";
+        }
         await refresh();
     }
     async function removeRepo(repoName: string) {
@@ -47,7 +55,9 @@
 
 <div>
     <h2>Mes Dépôts</h2>
-
+    {#if resMessage}
+        <div class="alert alert-danger">{resMessage}</div>
+    {/if}
     <div class="d-flex align-items-center gap-3 my-4">
         <label for="repo-select" class="fw-semibold">Choisir un dépôt :</label>
         <RepoSelect bind:bindValue={selectedRepoName} />

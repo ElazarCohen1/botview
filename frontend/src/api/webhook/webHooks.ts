@@ -23,14 +23,18 @@ export async function getWebHooks(
 export async function createWebHook(
     repoName: string,
     provider: GitProviderEnum = GitProviderEnum.GITHUB
-): Promise<boolean> {
+): Promise<{ ok: boolean; error?: string }> {
     try {
         const res = await fetch(`/api/hooks/${repoName}?provider=${provider}`, {
             method: "POST"
         });
-        return res.ok;
+        if (!res.ok) {
+            const error = await res.text();
+            return { ok: false, error };
+        }
+        return { ok: true };
     } catch (e) {
         console.error("error :", e);
-        return false;
+        return { ok: false, error: "Erreur de connexion" };
     }
 }
