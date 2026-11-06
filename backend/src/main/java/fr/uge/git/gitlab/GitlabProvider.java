@@ -1,13 +1,12 @@
 package fr.uge.git.gitlab;
 
 import fr.uge.git.GitProvider;
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
+import fr.uge.git.model.*;
+import io.micronaut.http.HttpHeaders;
 import jakarta.inject.Singleton;
 
 import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public class GitlabProvider implements GitProvider {
@@ -49,5 +48,10 @@ public class GitlabProvider implements GitProvider {
 
   @Override
   public GitRepoDto getRepository(String repoName){return null;}
+
+  @Override
+  public Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody) {
+    return Optional.empty();
+  }
 
 }
