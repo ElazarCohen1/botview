@@ -12,8 +12,6 @@ import java.util.List;
 public interface GitProvider {
   GitUserDto getUser();
 
-  void saveToken(String token);
-
   String getToken();
 
   void addRepository(String repoName);

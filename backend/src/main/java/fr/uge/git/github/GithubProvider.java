@@ -5,7 +5,10 @@ import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import fr.uge.git.model.WebHooksDto;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 
 import java.util.List;
@@ -14,23 +17,26 @@ import java.util.Objects;
 @Singleton
 public class GithubProvider implements GitProvider {
   private final GithubClient client;
-  private String token;
+  private final String token;
 
-  public GithubProvider(GithubClient client) {
+  public GithubProvider(GithubClient client, @Value("${github.token:}") String token) {
     Objects.requireNonNull(client);
+    Objects.requireNonNull(token);
     this.client = client;
-    this.token = "";
+    this.token = token;
     super();
+  }
+
+  private void requireToken() {
+    if (token.isBlank()) {
+      throw new HttpStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+              "Token GitHub non configuré (variable d'environnement GITHUB_TOKEN)");
+    }
   }
 
   @Override
   public GitUserDto getUser() {
     return client.getUser(this.token);
-  }
-
-  @Override
-  public void saveToken(String token) {
-    this.token = token;
   }
 
   @Override

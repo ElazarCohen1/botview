@@ -5,23 +5,26 @@ import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import fr.uge.git.model.WebHooksDto;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
+import java.util.Objects;
 
 @Singleton
 public class GitlabProvider implements GitProvider {
-  private String token;
+  private final String token;
+
+  public GitlabProvider(@Value("${gitlab.token:}") String token) {
+    Objects.requireNonNull(token);
+    this.token = token;
+    super();
+  }
 
   @Override
   public GitUserDto getUser() {
     return new GitUserDto("", 0, "null");
-  }
-
-  @Override
-  public void saveToken(String token) {
-    this.token = token;
   }
 
   @Override
