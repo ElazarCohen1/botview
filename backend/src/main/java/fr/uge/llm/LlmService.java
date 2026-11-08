@@ -9,8 +9,8 @@ import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 
 import java.io.IOException;
-
 import java.util.Objects;
+
 @Requires(notEnv = "test")
 @Context
 @Singleton
@@ -19,14 +19,15 @@ public class LlmService {
   // value get the value from the application.yml
   private final LlmInitialiser initialiser;
   private Thread loaderThread;
-  public LlmService(LlmInitialiser initialiser){
+
+  public LlmService(LlmInitialiser initialiser) {
     this.initialiser = initialiser;
     super();
   }
 
   @PostConstruct
   void init() {
-    loaderThread =  Thread.ofPlatform().daemon().start(()->{
+    loaderThread = Thread.ofPlatform().daemon().start(() -> {
       try {
         initialiser.initialiseModel();
       } catch (IOException | InterruptedException e) {

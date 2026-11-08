@@ -1,24 +1,28 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { getRepositories } from "../../api/repositories/repositories";
-    import type { Repository } from "../../types/Repository";
-    let { bindValue = $bindable("") } = $props<{
-        bindValue: string;
-    }>();
+    import {onMount} from "svelte";
+    import {getGitRepositories} from "../../api/repositories/repositories";
+    import type {Repository} from "../../types/Repository";
+    import {gitProvider} from "../../lib/stores.svelte";
+
+    let {bindValue = $bindable(null)}: {
+        bindValue: Repository | null;
+    } = $props();
+
     let repos = $state<Repository[]>([]);
     onMount(async () => {
-        const data = await getRepositories();
+        const data = await getGitRepositories(gitProvider.selected!);
         if (data && data.length > 0) {
             repos = data;
             if (!bindValue) {
-                bindValue = data[0].name;
+                bindValue = data[0];
             }
         }
     });
 </script>
-<select class="form-select" style="width: 22rem" bind:value={bindValue}>
-    <option value="" disabled>Choisir un repo…</option>
+
+<select bind:value={bindValue} class="form-select" style="width: 22rem">
+    <option disabled value="">Choisir un repo…</option>
     {#each repos as r}
-        <option value={r.name}>{r.name}</option>
+        <option value={r}>{r.full_name || r.name}</option>
     {/each}
 </select>

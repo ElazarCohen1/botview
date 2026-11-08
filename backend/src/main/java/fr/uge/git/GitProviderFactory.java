@@ -4,6 +4,7 @@ import fr.uge.git.bitbucket.BitbucketProvider;
 import fr.uge.git.github.GithubProvider;
 import fr.uge.git.gitlab.GitlabProvider;
 import jakarta.inject.Singleton;
+
 import java.util.Map;
 import java.util.Objects;
 

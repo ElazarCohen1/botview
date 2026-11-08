@@ -1,5 +1,6 @@
 <script lang="ts">
-    import type { PullRequest } from "../../types/PullRequest";
+    import type {PullRequest} from "../../types/PullRequest";
+
     export let pr: PullRequest;
 </script>
 
@@ -9,10 +10,10 @@
         Statut : <span class="badge bg-success">{pr.state}</span>
     </p>
     <a
-        href={pr.html_url}
-        target="_blank"
-        rel="noreferrer"
-        class="btn btn-sm btn-outline-secondary"
+            class="btn btn-sm btn-outline-secondary"
+            href={pr.html_url}
+            rel="noreferrer"
+            target="_blank"
     >
         Voir sur GitHub ↗
     </a>

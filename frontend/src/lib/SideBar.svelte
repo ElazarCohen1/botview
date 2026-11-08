@@ -2,23 +2,23 @@
     import {router} from "svelte-spa-router";
 
     const links = [
-        { href: "/", label: "Dashboard" },
-        { href: "/repositories", label: "Repositories" },
-        { href: "/settings", label: "Paramètres" },
+        {href: "/", label: "Dashboard"},
+        {href: "/repositories", label: "Repositories"},
+        {href: "/settings", label: "Paramètres"},
     ];
 </script>
 
 <aside class="sidebar">
     <div class="p-3">
         <h5>BotView</h5>
-        <hr />
+        <hr/>
         <ul class="nav nav-pills flex-column">
-            {#each links as { href, label }}
+            {#each links as {href, label}}
                 <li class="nav-item">
                     <a
-                        class="nav-link"
-                        class:active={router.location === href}
-                        href="#{href}"
+                            class="nav-link"
+                            class:active={router.location === href}
+                            href="#{href}"
                     >
                         {label}
                     </a>

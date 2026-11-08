@@ -5,6 +5,7 @@ import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import fr.uge.git.model.WebHooksDto;
+import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
@@ -12,11 +13,11 @@ import java.util.List;
 @Singleton
 public class BitbucketProvider implements GitProvider {
 
-  private String token ;
+  private String token;
 
   @Override
-  public GitUserDto getUser(){
-    return new GitUserDto("",0,"null");
+  public GitUserDto getUser() {
+    return new GitUserDto("", 0, "null");
   }
 
   @Override
@@ -30,24 +31,33 @@ public class BitbucketProvider implements GitProvider {
   }
 
   @Override
-  public List<GitRepoDto> getRepositories(){
-    return List.of();
+  public void addRepository(String repoName) {
+
   }
+
   @Override
-  public List<GitPullRequestDto> getPullRequests(String repoName){
+  public HttpResponse<?> removeWebhookFromRepository(int repoId) {
+    return HttpResponse.ok();
+  }
+
+  @Override
+  public List<GitRepoDto> getRepositories() {
     return List.of();
   }
 
   @Override
-  public List<WebHooksDto> getWebHooks(String repoName){
+  public List<GitPullRequestDto> getPullRequests(String repoName) {
     return List.of();
   }
 
   @Override
-  public WebHooksDto createWebhook (String repoName){
-    return  null;
+  public List<WebHooksDto> getWebHooks(String repoName) {
+    return List.of();
   }
+
   @Override
-  public GitRepoDto getRepository(String repoName){return null;}
+  public GitRepoDto getRepository(String repoName) {
+    return null;
+  }
 
 }

@@ -5,6 +5,7 @@ import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import fr.uge.git.model.WebHooksDto;
+import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
@@ -38,6 +39,17 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
+  public void addRepository(String repoName) {
+    Objects.requireNonNull(repoName);
+    client.addRepository(repoName, token);
+  }
+
+  @Override
+  public HttpResponse<?> removeWebhookFromRepository(int repoId) {
+    return client.removeWebhookFromRepository(repoId, token);
+  }
+
+  @Override
   public List<GitRepoDto> getRepositories() {
     return client.getRepositories(this.token);
   }
@@ -54,11 +66,6 @@ public class GithubProvider implements GitProvider {
     return client.getWebHooks(repoName, this.token);
   }
 
-  @Override
-  public WebHooksDto createWebhook(String repoName) {
-    Objects.requireNonNull(repoName);
-    return client.createWebhook(repoName, this.token);
-  }
 
   @Override
   public GitRepoDto getRepository(String repoName) {

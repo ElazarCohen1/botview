@@ -20,6 +20,7 @@ public class TokenController {
     this.factory = factory;
     super();
   }
+
   @Post
   public HttpResponse<?> saveToken(@Body TokenRequest request) {
     Objects.requireNonNull(request);
