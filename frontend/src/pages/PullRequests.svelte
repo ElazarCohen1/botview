@@ -1,12 +1,14 @@
-<script>
-    import { onMount } from "svelte";
-    import { getPullRequest } from "../api/pullRequest/pullRequest";
+<script lang="ts">
+    import {onMount} from "svelte";
+    import {getPullRequest} from "../api/pullRequest/pullRequest";
     import PullRequestItem from "../components/reviews/PullRequestItem.svelte";
-    /** @type {any[]} */
-    let pullRequests = $state([]);
-    let repoName = $state("");
-    let loading = $state(true);
-    let error = $state("");
+    import type {PullRequest} from "../types/PullRequest";
+
+
+    let pullRequests: PullRequest[] = $state([]);
+    let repoName: string = $state("");
+    let loading: boolean = $state(true);
+    let error: string = $state("");
 
     onMount(async () => {
         const hash = window.location.hash;
@@ -34,7 +36,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Pull Requests : {repoName}</h2>
-        <a href="#/repositories" class="btn btn-sm btn-outline-secondary">
+        <a class="btn btn-sm btn-outline-secondary" href="#/repositories">
             ← Retour aux dépôts
         </a>
     </div>
@@ -51,7 +53,7 @@
         </div>
     {:else}
         {#each pullRequests as pr}
-            <PullRequestItem {pr} />
+            <PullRequestItem {pr}/>
         {/each}
     {/if}
 </div>

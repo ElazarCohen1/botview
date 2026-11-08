@@ -2,7 +2,11 @@ package fr.uge.git.github;
 
 import fr.uge.git.GitProvider;
 import fr.uge.git.model.*;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.http.HttpHeaders;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.Objects;
@@ -11,13 +15,21 @@ import java.util.Optional;
 @Singleton
 public class GithubProvider implements GitProvider {
   private final GithubClient client;
-  private String token;
+  private final String token;
 
-  public GithubProvider(GithubClient client) {
+  public GithubProvider(GithubClient client, @Value("${github.token:}") String token) {
     Objects.requireNonNull(client);
+    Objects.requireNonNull(token);
     this.client = client;
-    this.token = "";
+    this.token = token;
     super();
+  }
+
+  private void requireToken() {
+    if (token.isBlank()) {
+      throw new HttpStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+              "Token GitHub non configuré (variable d'environnement GITHUB_TOKEN)");
+    }
   }
 
   @Override
@@ -26,13 +38,19 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public void saveToken(String token) {
-    this.token = token;
+  public String getToken() {
+    return token;
   }
 
   @Override
-  public String getToken() {
-    return token;
+  public void addRepository(String repoName) {
+    Objects.requireNonNull(repoName);
+    client.addRepository(repoName, token);
+  }
+
+  @Override
+  public HttpResponse<?> removeWebhookFromRepository(int repoId) {
+    return client.removeWebhookFromRepository(repoId, token);
   }
 
   @Override
@@ -52,17 +70,13 @@ public class GithubProvider implements GitProvider {
     return client.getWebHooks(repoName, this.token);
   }
 
-  @Override
-  public WebHooksDto createWebhook(String repoName) {
-    Objects.requireNonNull(repoName);
-    return client.createWebhook(repoName, this.token);
-  }
 
   @Override
   public GitRepoDto getRepository(String repoName) {
     Objects.requireNonNull(repoName);
     return client.getRepository(repoName, this.token);
   }
+
 
   @Override
   public Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody) {

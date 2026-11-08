@@ -5,7 +5,7 @@
 </script>
 
 <div class="input-group" style="width: 22rem">
-    <select class="form-select" bind:value={selected} disabled={!availableRepos.length}>
+    <select bind:value={selected} class="form-select" disabled={!availableRepos.length}>
         <option value="">
             {availableRepos.length ? 'Choisir un repo…' : 'Aucun repo disponible'}
         </option>

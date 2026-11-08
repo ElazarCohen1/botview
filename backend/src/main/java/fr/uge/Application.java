@@ -13,7 +13,6 @@ public class Application {
     Path dataDir = baseDirectory().resolve("data");
     Files.createDirectories(dataDir);
     System.setProperty("db.path", dataDir.resolve("botview.duckdb").toString());
-
     Micronaut.run(Application.class, args);
   }
 

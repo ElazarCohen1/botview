@@ -19,9 +19,9 @@ public class ModelDownloader {
   /**
    *
    * @param target the folder we want to put the gguf file
-   * @param url the url we load the gguf file
+   * @param url    the url we load the gguf file
    * @return the target
-   * @throws IOException we create the directories so it may return an exception
+   * @throws IOException          we create the directories so it may return an exception
    * @throws InterruptedException throws
    */
   public Path ensureModel(Path target, URI url) throws IOException, InterruptedException {

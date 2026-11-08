@@ -1,6 +1,5 @@
-import { wrap } from 'svelte-spa-router/wrap';
-import type { SvelteComponent } from 'svelte';
-import { auth } from './lib/stores.svelte'
+import {wrap} from 'svelte-spa-router/wrap';
+import {auth} from './lib/stores.svelte'
 
 import Login from './pages/Login.svelte';
 import Dashboard from './pages/Dashboard.svelte';
@@ -11,7 +10,7 @@ import Settings from './pages/Settings.svelte';
 const requireAuth = () => auth.isConnected;
 
 const guarded = (component: any) =>
-    wrap({ component, conditions: [requireAuth] });
+    wrap({component, conditions: [requireAuth]});
 
 export const routes = {
     '/login': Login,

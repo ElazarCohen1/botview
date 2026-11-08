@@ -5,14 +5,14 @@
         style
     }: {
         message: string;
-        onClick : () => void;
+        onClick: () => void;
         style: string;
     }
-    = $props();
+        = $props();
 
 </script>
 
-<button onclick={onClick} class="btn btn-outline-primary btn-sm">
+<button class="btn btn-outline-primary btn-sm" onclick={onClick}>
     {message}
 </button>
 
