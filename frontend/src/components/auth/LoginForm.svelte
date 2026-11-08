@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { GitProviderEnum } from "../../types/Git";
-    import { saveToken } from "../../api/login/gitApi";
+    import {GitProviderEnum} from "../../types/Git";
+    import {saveToken} from "../../api/login/gitApi";
     import ProviderSelectButton from "../common/ProviderSelectButton.svelte";
-    import { gitProvider } from "../../lib/stores.svelte";
+    import {gitProvider} from "../../lib/stores.svelte";
 
     let {
         isFirst,
@@ -51,35 +51,35 @@
 
 <form class="d-flex flex-column align-items-end" onsubmit={submit}>
     <div class="input-group">
-        <ProviderSelectButton bind:bindValue={provider} />
+        <ProviderSelectButton bind:bindValue={provider}/>
 
         <input
-                type="password"
-                class="form-control"
-                style="width: 18rem"
-                placeholder="Token"
                 autocomplete="off"
                 bind:value={token}
+                class="form-control"
                 disabled={loading}
+                placeholder="Token"
                 required
+                style="width: 18rem"
+                type="password"
         />
 
         <button
-            class="btn btn-primary"
-            type="submit"
-            disabled={loading || !token.trim()}
+                class="btn btn-primary"
+                disabled={loading || !token.trim()}
+                type="submit"
         >
             {loading ? "Ajout…" : "Ajouter le token"}
         </button>
 
         <button
-            type="button"
-            class="btn btn-outline-primary"
-            onclick={isFirst ? onAdd : onRemove}
-            disabled={isFirst && !canAdd}
-            aria-label={isFirst
+                aria-label={isFirst
                 ? "Ajouter un provider"
                 : "Supprimer ce provider"}
+                class="btn btn-outline-primary"
+                disabled={isFirst && !canAdd}
+                onclick={isFirst ? onAdd : onRemove}
+                type="button"
         >
             <i class="bi {isFirst ? 'bi-plus-lg' : 'bi-dash-lg'}"></i>
         </button>

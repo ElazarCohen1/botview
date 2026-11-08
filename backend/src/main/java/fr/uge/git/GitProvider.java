@@ -5,11 +5,9 @@ import fr.uge.git.model.GitPullRequestDto;
 import fr.uge.git.model.GitRepoDto;
 import fr.uge.git.model.GitUserDto;
 import fr.uge.git.model.WebHooksDto;
-import io.micronaut.core.type.Argument;
+import io.micronaut.http.HttpResponse;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public interface GitProvider {
   GitUserDto getUser();
@@ -18,12 +16,15 @@ public interface GitProvider {
 
   String getToken();
 
+  void addRepository(String repoName);
+
+  HttpResponse<?> removeWebhookFromRepository(int repoId);
+
   List<GitRepoDto> getRepositories();
+
   List<GitPullRequestDto> getPullRequests(String repoName);
 
   List<WebHooksDto> getWebHooks(String repoName);
-
-  WebHooksDto createWebhook (String repoName);
 
   GitRepoDto getRepository(String repoName);
 

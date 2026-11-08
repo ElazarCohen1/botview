@@ -6,4 +6,5 @@ export interface Repository {
     gitProviderType: string;
     branch: string;
     description: string;
+    has_webhook: boolean
 }

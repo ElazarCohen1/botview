@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { push } from 'svelte-spa-router';
+    import {push} from 'svelte-spa-router';
     import EmptyState from '../components/common/EmptyState.svelte';
     import LoginForm from '../components/auth/LoginForm.svelte';
     import ProviderSelectButton from '../components/common/ProviderSelectButton.svelte';
-    import { GitProviderEnum } from '../types/Git';
-    import { getUser } from '../api/login/gitApi';
-    import { auth } from '../lib/stores.svelte';
+    import {GitProviderEnum} from '../types/Git';
+    import {getUser} from '../api/login/gitApi';
+    import {auth} from '../lib/stores.svelte';
 
     const MAX_FORMS = 3;
 
@@ -36,7 +36,7 @@
         try {
             const currentUser = await getUser(connexionProvider);
             if (!currentUser) {
-                throw new Error("Impossible de récupérer l'utilisateur de ce provider.");
+                return null;
             }
             auth.setUser(currentUser);
         } catch (e) {
@@ -53,24 +53,24 @@
             <h3 class="text-center mb-4">BotView</h3>
 
             <EmptyState
-                icon="bi-plug"
-                message="Connecte-toi à un provider Git pour commencer."
+                    icon="bi-plug"
+                    message="Connecte-toi à un provider Git pour commencer."
             />
 
             {#each loginForms as id, i (id)}
                 <div class="mb-3">
                     <LoginForm
-                        isFirst={i === 0}
-                        {canAdd}
-                        onAdd={addLoginForm}
-                        onRemove={() => removeLoginForm(id)}
+                            isFirst={i === 0}
+                            {canAdd}
+                            onAdd={addLoginForm}
+                            onRemove={() => removeLoginForm(id)}
                     />
                 </div>
             {/each}
 
             <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
-                <ProviderSelectButton bind:bindValue={connexionProvider} />
-                <button type="button" class="btn btn-primary" onclick={login} disabled={connecting}>
+                <ProviderSelectButton bind:bindValue={connexionProvider}/>
+                <button class="btn btn-primary" disabled={connecting} onclick={login} type="button">
                     {connecting ? 'Connexion…' : 'Connexion'}
                 </button>
             </div>

@@ -1,21 +1,21 @@
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import {defineConfig} from 'vite'
+import {svelte} from '@sveltejs/vite-plugin-svelte'
 
 export default defineConfig({
-  plugins: [svelte()],
+    plugins: [svelte()],
 
-  build: {
-    outDir: '../backend/src/main/resources/public',
-    emptyOutDir: true
-  },
+    build: {
+        outDir: '../backend/src/main/resources/public',
+        emptyOutDir: true
+    },
 
-  server: {
-    allowedHosts: ['upscale-sixfold-extruding.ngrok-free.dev'],
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      }
+    server: {
+        allowedHosts: ['upscale-sixfold-extruding.ngrok-free.dev'],
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true
+            }
+        }
     }
-  }
 })

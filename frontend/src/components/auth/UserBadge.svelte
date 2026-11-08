@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { push } from "svelte-spa-router";
-    import { auth } from "../../lib/stores.svelte";
+    import {push} from "svelte-spa-router";
+    import {auth} from "../../lib/stores.svelte";
 
     function logout() {
         auth.logout();
@@ -10,17 +10,17 @@
 
 <div class="d-flex align-items-center gap-2">
     <img
-        src={auth.user?.avatar_url}
-        alt="avatar"
-        width="64"
-        height="64"
-        class="rounded-circle"
+            alt="avatar"
+            class="rounded-circle"
+            height="64"
+            src={auth.user?.avatar_url}
+            width="64"
     />
     <div>{auth.user?.login}</div>
     <button
-        class="btn btn-outline-secondary btn-sm ms-2"
-        onclick={logout}
-        aria-label="Se déconnecter"
+            aria-label="Se déconnecter"
+            class="btn btn-outline-secondary btn-sm ms-2"
+            onclick={logout}
     >
         <i class="bi bi-box-arrow-right"></i>
     </button>

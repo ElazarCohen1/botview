@@ -1,5 +1,5 @@
-import type { GitUserDto } from "../../types/Git";
-import { GitProviderEnum } from "../../types/Git";
+import type {GitUserDto} from "../../types/Git";
+import {GitProviderEnum} from "../../types/Git";
 
 export async function saveToken(
     provider: GitProviderEnum,
@@ -11,7 +11,7 @@ export async function saveToken(
             "Content-Type": "application/json"
         },
         credentials: "same-origin",
-        body: JSON.stringify({ provider, token })
+        body: JSON.stringify({provider, token})
     });
 
     if (!res.ok) {
@@ -24,7 +24,7 @@ export async function getUser(
 ): Promise<GitUserDto> {
     const res = await fetch(
         `/api/user?provider=${encodeURIComponent(provider)}`,
-        { credentials: "same-origin" }
+        {credentials: "same-origin"}
     );
 
     if (!res.ok) {

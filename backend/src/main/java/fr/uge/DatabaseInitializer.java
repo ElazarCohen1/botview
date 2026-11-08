@@ -33,7 +33,7 @@ public class DatabaseInitializer {
 
   public void init() throws SQLException {
     try (var conn = dataSource.getConnection();
-        var stmt = conn.createStatement()) {
+         var stmt = conn.createStatement()) {
 
       createEnums(conn, stmt);
       createSequences(stmt);
@@ -50,9 +50,9 @@ public class DatabaseInitializer {
   }
 
   private void createEnumIfAbsent(Connection conn, Statement stmt, String name, String values)
-      throws SQLException {
+          throws SQLException {
     try (var ps = conn.prepareStatement(
-        "SELECT 1 FROM duckdb_types() WHERE type_name = ?")) {
+            "SELECT 1 FROM duckdb_types() WHERE type_name = ?")) {
       ps.setString(1, name);
       try (var rs = ps.executeQuery()) {
         if (rs.next()) {
@@ -64,84 +64,86 @@ public class DatabaseInitializer {
   }
 
   private void createSequences(Statement stmt) throws SQLException {
-    for (var table : new String[] {
-        "repository", "pull_request", "review", "analysis", "file", "modified_line" }) {
+    for (var table : new String[]{
+            "repository", "pull_request", "review", "analysis", "file", "modified_line"}) {
       stmt.execute("CREATE SEQUENCE IF NOT EXISTS " + table + "_seq START 1");
     }
   }
 
   private void createTables(Statement stmt) throws SQLException {
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS REPOSITORY (
-          id          INTEGER PRIMARY KEY DEFAULT nextval('repository_seq'),
-          name        VARCHAR(255) NOT NULL CHECK (length(name) <= 255),
-          url         VARCHAR(2048) NOT NULL UNIQUE CHECK (length(url) <= 2048),
-          origin      gitProvider NOT NULL
-        )""");
+            CREATE TABLE IF NOT EXISTS REPOSITORY (
+              id          INTEGER PRIMARY KEY DEFAULT nextval('repository_seq'),
+              name        VARCHAR(255) NOT NULL CHECK (length(name) <= 255),
+              url         VARCHAR(2048) NOT NULL UNIQUE CHECK (length(url) <= 2048),
+              origin      gitProvider NOT NULL,
+              has_webhook boolean NOT NULL,
+              webhook_id VARCHAR(255)
+            )""");
 
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS PULL_REQUEST (
-          id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
-          name           VARCHAR(255) NOT NULL,
-          commit_id      VARCHAR(64) NOT NULL,
-          status         pr_status NOT NULL,
-          created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
-          repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id)
-        )""");
+            CREATE TABLE IF NOT EXISTS PULL_REQUEST (
+              id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
+              name           VARCHAR(255) NOT NULL,
+              commit_id      VARCHAR(64) NOT NULL,
+              status         pr_status NOT NULL,
+              created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
+              repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id)
+            )""");
 
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS REVIEW (
-          id              INTEGER PRIMARY KEY DEFAULT nextval('review_seq'),
-          global_comment  TEXT,
-          status          review_status NOT NULL,
-          is_blocking     BOOLEAN NOT NULL DEFAULT false,
-          created_at      TIMESTAMP NOT NULL DEFAULT current_timestamp,
-          pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id)
-        )""");
+            CREATE TABLE IF NOT EXISTS REVIEW (
+              id              INTEGER PRIMARY KEY DEFAULT nextval('review_seq'),
+              global_comment  TEXT,
+              status          review_status NOT NULL,
+              is_blocking     BOOLEAN NOT NULL DEFAULT false,
+              created_at      TIMESTAMP NOT NULL DEFAULT current_timestamp,
+              pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id)
+            )""");
 
     stmt.execute("""
-
-        CREATE TABLE IF NOT EXISTS ANALYSIS (
-          id          INTEGER PRIMARY KEY DEFAULT nextval('analysis_seq'),
-          tool        VARCHAR(100) NOT NULL,
-          result      TEXT,
-          status      analysis_status NOT NULL,
-          created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
-          review_id   INTEGER NOT NULL REFERENCES REVIEW(id)
-        )""");
-
-    stmt.execute("""
-        CREATE TABLE IF NOT EXISTS FILE (
-          id             INTEGER PRIMARY KEY DEFAULT nextval('file_seq'),
-          status         change_status NOT NULL,
-          name           VARCHAR(255) NOT NULL,
-          relative_path  VARCHAR(1024) NOT NULL,
-          created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp
-        )""");
+            
+            CREATE TABLE IF NOT EXISTS ANALYSIS (
+              id          INTEGER PRIMARY KEY DEFAULT nextval('analysis_seq'),
+              tool        VARCHAR(100) NOT NULL,
+              result      TEXT,
+              status      analysis_status NOT NULL,
+              created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
+              review_id   INTEGER NOT NULL REFERENCES REVIEW(id)
+            )""");
 
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS MODIFIED_LINE (
-          id         INTEGER PRIMARY KEY DEFAULT nextval('modified_line_seq'),
-          status     change_status NOT NULL,
-          old_value  TEXT,
-          new_value  TEXT,
-          file_id    INTEGER NOT NULL REFERENCES FILE(id)
-        )""");
+            CREATE TABLE IF NOT EXISTS FILE (
+              id             INTEGER PRIMARY KEY DEFAULT nextval('file_seq'),
+              status         change_status NOT NULL,
+              name           VARCHAR(255) NOT NULL,
+              relative_path  VARCHAR(1024) NOT NULL,
+              created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp
+            )""");
+
+    stmt.execute("""
+            CREATE TABLE IF NOT EXISTS MODIFIED_LINE (
+              id         INTEGER PRIMARY KEY DEFAULT nextval('modified_line_seq'),
+              status     change_status NOT NULL,
+              old_value  TEXT,
+              new_value  TEXT,
+              file_id    INTEGER NOT NULL REFERENCES FILE(id)
+            )""");
 
     // Associations
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS MODIFIES (
-          pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id),
-          file_id         INTEGER NOT NULL REFERENCES FILE(id),
-          PRIMARY KEY (pull_request_id, file_id)
-        )""");
+            CREATE TABLE IF NOT EXISTS MODIFIES (
+              pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id),
+              file_id         INTEGER NOT NULL REFERENCES FILE(id),
+              PRIMARY KEY (pull_request_id, file_id)
+            )""");
 
     stmt.execute("""
-        CREATE TABLE IF NOT EXISTS COMMENTS_ON (
-          review_id         INTEGER NOT NULL REFERENCES REVIEW(id),
-          modified_line_id  INTEGER NOT NULL REFERENCES MODIFIED_LINE(id),
-          human_flag        BOOLEAN NOT NULL DEFAULT false,
-          PRIMARY KEY (review_id, modified_line_id)
-        )""");
+            CREATE TABLE IF NOT EXISTS COMMENTS_ON (
+              review_id         INTEGER NOT NULL REFERENCES REVIEW(id),
+              modified_line_id  INTEGER NOT NULL REFERENCES MODIFIED_LINE(id),
+              human_flag        BOOLEAN NOT NULL DEFAULT false,
+              PRIMARY KEY (review_id, modified_line_id)
+            )""");
   }
 }

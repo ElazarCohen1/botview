@@ -18,24 +18,17 @@ import java.util.concurrent.locks.ReentrantLock;
   thread safe class for downloading the gguf file for the llama.cpp llm
  */
 public class LlmInitialiser {
-  private enum Status{
-    NOT_INITIALIZED, LOADING, READY, FAILED,CLOSED
-  }
-
   private final ReentrantLock lock;
   private final Condition condition;
-  private LlamaModel model;
   private final ModelDownloader downloader;
   private final String modelPath;
   private final String modelUrl;
+  private LlamaModel model;
   private Status status;
   private Exception initializationError;
-
-
-
   public LlmInitialiser(ModelDownloader downloader,
                         @Value("${llm.model-url}") String modelUrl,
-                        @Value("${llm.model-path}") String modelPath){
+                        @Value("${llm.model-path}") String modelPath) {
     Objects.requireNonNull(modelPath);
     Objects.requireNonNull(modelUrl);
     Objects.requireNonNull(downloader);
@@ -54,7 +47,6 @@ public class LlmInitialiser {
     try {
       var path = downloader.ensureModel(Path.of(modelPath), URI.create(modelUrl));
       var loadedModel = new LlamaModel(new ModelParameters().setModel(path.toString()));
-
       lock.lock();
       try {
         if (status == Status.CLOSED) {
@@ -67,7 +59,7 @@ public class LlmInitialiser {
       } finally {
         lock.unlock();
       }
-    }catch (IOException | InterruptedException e){
+    } catch (IOException | InterruptedException e) {
       lock.lock();
       try {
         if (status != Status.CLOSED) {
@@ -100,17 +92,15 @@ public class LlmInitialiser {
     }
   }
 
-
-
   public void initialiseModel() throws IOException, InterruptedException {
     lock.lock();
-    try{
+    try {
       // llm already initialised
-      if(status != Status.NOT_INITIALIZED){
-        return ;
+      if (status != Status.NOT_INITIALIZED) {
+        return;
       }
       status = Status.LOADING;
-    }finally {
+    } finally {
       lock.unlock();
     }
     loadModel();
@@ -135,6 +125,10 @@ public class LlmInitialiser {
     } finally {
       lock.unlock();
     }
+  }
+
+  private enum Status {
+    NOT_INITIALIZED, LOADING, READY, FAILED, CLOSED
   }
 
 }

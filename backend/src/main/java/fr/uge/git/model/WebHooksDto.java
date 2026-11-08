@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Serdeable
 public record WebHooksDto(int id, String name, List<String> events) {
-    public WebHooksDto {
-        Objects.requireNonNull(name);
-    }
+  public WebHooksDto {
+    Objects.requireNonNull(name);
+  }
 }

@@ -1,4 +1,4 @@
-export interface PullRequest{
+export interface PullRequest {
     number: number;
     title: string;
     state: string;

@@ -27,7 +27,7 @@ micronaut:
 
     intercept-url-map:
       - pattern: /**
-        access: [isAnonymous()]
+        access: [ isAnonymous() ]
 github:
   token: ${GITHUB_TOKEN:}
 
