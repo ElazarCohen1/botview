@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import Router, { push } from 'svelte-spa-router';
+    import {onMount} from 'svelte';
+    import Router, {push} from 'svelte-spa-router';
     import NavBar from './lib/NavBar.svelte';
     import SideBar from './lib/SideBar.svelte';
-    import { routes } from './route';
-    import { auth, gitProvider } from './lib/stores.svelte';
-    import { getUser } from './api/login/gitApi';
+    import {routes} from './route';
+    import {auth, gitProvider} from './lib/stores.svelte';
+    import {getUser} from './api/login/gitApi';
 
     function onConditionsFailed() {
         push('/login');
@@ -26,12 +26,12 @@
 
 {#if auth.ready}
     {#if auth.isConnected}
-        <NavBar />
-        <SideBar />
+        <NavBar/>
+        <SideBar/>
     {/if}
 
     <main class:content={auth.isConnected}>
-        <Router {routes} {onConditionsFailed} />
+        <Router {routes} {onConditionsFailed}/>
     </main>
 {/if}
 
@@ -40,6 +40,7 @@
         margin-left: 250px;
         padding: 1.5rem;
     }
+
     :global(body) {
         padding-top: 100px;
     }

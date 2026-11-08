@@ -1,10 +1,8 @@
 package fr.uge.git;
 
 
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
+import fr.uge.git.model.*;
+import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 
 import java.util.List;

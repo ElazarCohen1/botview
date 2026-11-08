@@ -1,12 +1,12 @@
-import type { GitUserDto } from "../../types/Git";
-import { GitProviderEnum } from "../../types/Git";
+import type {GitUserDto} from "../../types/Git";
+import {GitProviderEnum} from "../../types/Git";
 
 export async function getUser(
     provider: GitProviderEnum
 ): Promise<GitUserDto> {
     const res = await fetch(
         `/api/user?provider=${encodeURIComponent(provider)}`,
-        { credentials: "same-origin" }
+        {credentials: "same-origin"}
     );
 
     if (!res.ok) {

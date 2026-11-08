@@ -8,6 +8,7 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,7 +83,7 @@ public class GithubProvider implements GitProvider {
   public Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody) {
     Objects.requireNonNull(headers);
     Objects.requireNonNull(rawBody);
-    return client.parseWebhook(headers,rawBody);
+    return client.parseWebhook(headers, rawBody);
   }
 
 

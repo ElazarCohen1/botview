@@ -1,17 +1,15 @@
 package fr.uge.git.gitlab;
 
 import fr.uge.git.GitProvider;
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
+import fr.uge.git.model.*;
 import io.micronaut.context.annotation.Value;
+import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 
 @Singleton
 public class GitlabProvider implements GitProvider {

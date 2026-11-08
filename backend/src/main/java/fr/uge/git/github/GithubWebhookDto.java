@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * for representing the result when receving the webhook event from github
+ *
  * @param action
  * @param pullRequest
  * @param repository
@@ -18,13 +19,16 @@ record GitHubWebhookDto(@NotNull String action, @NotNull @JsonProperty("pull_req
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record PullRequest(int number, @NotNull Ref head, @NotNull Ref base) {}
+  record PullRequest(int number, @NotNull Ref head, @NotNull Ref base) {
+  }
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record Ref(@NotNull String sha, @NotNull String ref) {}
+  record Ref(@NotNull String sha, @NotNull String ref) {
+  }
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record Repository(@JsonProperty("full_name") @NotNull String fullName) {}
+  record Repository(@JsonProperty("full_name") @NotNull String fullName) {
+  }
 }
