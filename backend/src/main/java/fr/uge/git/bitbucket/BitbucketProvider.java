@@ -1,16 +1,15 @@
 package fr.uge.git.bitbucket;
 
 import fr.uge.git.GitProvider;
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
+import fr.uge.git.model.*;
 import io.micronaut.context.annotation.Value;
+import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Singleton;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Singleton
 public class BitbucketProvider implements GitProvider {
@@ -62,5 +61,11 @@ public class BitbucketProvider implements GitProvider {
   public GitRepoDto getRepository(String repoName) {
     return null;
   }
+
+  @Override
+  public Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody) {
+    return Optional.empty();
+  }
+
 
 }

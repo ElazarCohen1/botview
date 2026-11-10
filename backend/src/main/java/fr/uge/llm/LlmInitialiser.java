@@ -26,6 +26,7 @@ public class LlmInitialiser {
   private LlamaModel model;
   private Status status;
   private Exception initializationError;
+
   public LlmInitialiser(ModelDownloader downloader,
                         @Value("${llm.model-url}") String modelUrl,
                         @Value("${llm.model-path}") String modelPath) {

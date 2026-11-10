@@ -1,4 +1,4 @@
-import { GitProviderEnum, type GitUserDto } from '../types/Git';
+import {GitProviderEnum, type GitUserDto} from '../types/Git';
 
 const STORAGE_KEY = 'botview.provider';
 
@@ -24,14 +24,16 @@ export const gitProvider = {
         selectedProvider = provider;
         try {
             localStorage.setItem(STORAGE_KEY, provider);
-        } catch { /* ignore */ }
+        } catch { /* ignore */
+        }
     },
 
     reset() {
         selectedProvider = null;
         try {
             localStorage.removeItem(STORAGE_KEY);
-        } catch { /* ignore */ }
+        } catch { /* ignore */
+        }
     }
 };
 
