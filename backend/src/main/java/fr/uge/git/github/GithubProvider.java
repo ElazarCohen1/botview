@@ -1,11 +1,9 @@
 package fr.uge.git.github;
 
 import fr.uge.git.GitProvider;
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
+import fr.uge.git.model.*;
 import io.micronaut.context.annotation.Value;
+import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
@@ -13,6 +11,7 @@ import jakarta.inject.Singleton;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Singleton
 public class GithubProvider implements GitProvider {
@@ -78,5 +77,14 @@ public class GithubProvider implements GitProvider {
     Objects.requireNonNull(repoName);
     return client.getRepository(repoName, this.token);
   }
+
+
+  @Override
+  public Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody) {
+    Objects.requireNonNull(headers);
+    Objects.requireNonNull(rawBody);
+    return client.parseWebhook(headers, rawBody);
+  }
+
 
 }

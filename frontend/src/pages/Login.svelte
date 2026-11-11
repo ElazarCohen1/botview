@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { push } from 'svelte-spa-router';
+    import {push} from 'svelte-spa-router';
     import EmptyState from '../components/common/EmptyState.svelte';
     import ProviderSelectButton from '../components/common/ProviderSelectButton.svelte';
-    import { GitProviderEnum } from '../types/Git';
-    import { getUser } from '../api/login/gitApi';
-    import { auth, gitProvider } from '../lib/stores.svelte';
+    import {GitProviderEnum} from '../types/Git';
+    import {getUser} from '../api/login/gitApi';
+    import {auth, gitProvider} from '../lib/stores.svelte';
 
     let connexionProvider = $state<GitProviderEnum>(GitProviderEnum.GITHUB);
     let connecting = $state(false);
@@ -35,11 +35,11 @@
         <div class="col-md-8 col-lg-6">
             <h3 class="text-center mb-4">BotView</h3>
 
-            <EmptyState icon="bi-plug" message="Choisis un provider Git pour commencer." />
+            <EmptyState icon="bi-plug" message="Choisis un provider Git pour commencer."/>
 
             <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
-                <ProviderSelectButton bind:bindValue={connexionProvider} />
-                <button type="button" class="btn btn-primary" onclick={login} disabled={connecting}>
+                <ProviderSelectButton bind:bindValue={connexionProvider}/>
+                <button class="btn btn-primary" disabled={connecting} onclick={login} type="button">
                     {connecting ? 'Connexion…' : 'Connexion'}
                 </button>
             </div>
