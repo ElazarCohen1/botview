@@ -13,11 +13,10 @@ import java.net.URI;
 @Requires(property = "ngrok.enabled", value = "true")
 public class connectNgrok {
   @EventListener
-  public void connectNgrokOnStartup(StartupEvent event) throws Exception {
+  public void connectNgrokOnStartup(StartupEvent event) throws IOException {
     try {
-      com.ngrok.Forwarder.Endpoint forwarder;
       var session = Session.withAuthtokenFromEnv().connect();
-      forwarder = session.httpEndpoint()
+      var forwarder = session.httpEndpoint()
               .domain("upscale-sixfold-extruding.ngrok-free.dev")
               .forward(new URI("http://localhost:8080").toURL());
       IO.println("Available at: " + forwarder.getUrl());

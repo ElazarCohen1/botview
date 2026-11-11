@@ -1,7 +1,6 @@
 package fr.uge.llm;
 
 import de.kherud.llama.InferenceParameters;
-import de.kherud.llama.LlamaModel;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import jakarta.annotation.PostConstruct;
@@ -40,7 +39,7 @@ public class LlmService {
   public String complete(String prompt) {
     Objects.requireNonNull(prompt);
     try {
-      LlamaModel model = initialiser.getModel();
+      var model = initialiser.getModel();
       return model.complete(new InferenceParameters(prompt).setNPredict(512));
 
     } catch (InterruptedException e) {

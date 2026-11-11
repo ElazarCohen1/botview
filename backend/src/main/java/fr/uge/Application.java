@@ -10,14 +10,15 @@ import java.nio.file.Path;
 public class Application {
 
   static void main(String[] args) throws IOException, URISyntaxException {
-    Path dataDir = baseDirectory().resolve("data");
+    var dataDir = baseDirectory().resolve("data");
     Files.createDirectories(dataDir);
     System.setProperty("db.path", dataDir.resolve("botview.duckdb").toString());
     Micronaut.run(Application.class, args);
   }
 
   private static Path baseDirectory() throws URISyntaxException {
-    Path location = Path.of(Application.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+    var location = Path.of(Application.class.getProtectionDomain().
+            getCodeSource().getLocation().toURI());
     if (Files.isRegularFile(location)) {
       return location.toAbsolutePath().getParent();
     }
