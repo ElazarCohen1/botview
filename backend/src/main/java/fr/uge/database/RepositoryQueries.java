@@ -26,7 +26,6 @@ public class RepositoryQueries {
     }
 
 
-    @Transactional
     public RepositoryDto getRepository(int repId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin from REPOSITORY where id = ?");
@@ -47,7 +46,6 @@ public class RepositoryQueries {
      * @param provider Git provider type ( can be for example : GITLAB, GITHUB, BITBUCKET)
      * @throws SQLException if there is database error
      */
-    @Transactional
     public void addRepository(String name, String url, GitProviderType provider) throws SQLException{
         Objects.requireNonNull(name);
         Objects.requireNonNull(url);
@@ -68,7 +66,6 @@ public class RepositoryQueries {
      * @param provider Git provider type ( can be for example : GITLAB, GITHUB, BITBUCKET)
      * @throws SQLException if there is database error
      */
-    @Transactional
     public  void deleteRepository(String name, GitProviderType provider) throws SQLException{
         Objects.requireNonNull(name);
         Objects.requireNonNull(provider);
@@ -87,7 +84,6 @@ public class RepositoryQueries {
      * @return a list of repositories specific to the provider
      * @throws SQLException if there is database error
      */
-    @Transactional
     public List<RepositoryDto> getAllRepositories(GitProviderType provider) throws SQLException {
         Objects.requireNonNull(provider);
         try (Connection conn = dataSource.getConnection()) {

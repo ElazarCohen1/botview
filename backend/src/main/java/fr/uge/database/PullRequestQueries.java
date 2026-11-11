@@ -26,7 +26,6 @@ public class PullRequestQueries {
      * @return a list of all stored pull requests in datadbase
      * @throws SQLException if there is database error
      */
-    @Transactional
     public List<PullRequest> getAllPullRequest() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             Statement stmt = conn.createStatement();
@@ -47,7 +46,6 @@ public class PullRequestQueries {
      * @return the pull request
      * @throws SQLException if there is database error
      */
-    @Transactional
     public PullRequest getPullRequest(int prId) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn
