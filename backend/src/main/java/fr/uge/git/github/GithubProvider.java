@@ -8,6 +8,7 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.util.List;
 import java.util.Objects;
@@ -84,6 +85,19 @@ public class GithubProvider implements GitProvider {
     Objects.requireNonNull(headers);
     Objects.requireNonNull(rawBody);
     return client.parseWebhook(headers, rawBody);
+  }
+
+  @Override
+  public CloneParams cloneSpec(GitWebhookDto event) {
+    if (token.isBlank()) {
+      throw new IllegalStateException(
+              "GITHUB_TOKEN is missing or empty"
+      );
+    }
+    return new CloneParams(
+            "https://github.com/" + event.repo() + ".git",
+            "refs/pull/" + event.prNumber() + "/head",
+            new UsernamePasswordCredentialsProvider("x-access-token", this.token));
   }
 
 

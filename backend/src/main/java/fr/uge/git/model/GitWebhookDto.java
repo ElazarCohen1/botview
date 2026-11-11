@@ -2,8 +2,7 @@ package fr.uge.git.model;
 
 import fr.uge.git.GitProviderType;
 import io.micronaut.serde.annotation.Serdeable;
-
-import java.util.Objects;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * the global representation after receiving a git webhook
@@ -15,13 +14,7 @@ import java.util.Objects;
  * @param action   the event triggered (opened, closed, new push , ...)
  */
 @Serdeable
-public record GitWebhookDto(GitProviderType provider, String repo, String baseSha, String headSha, String action) {
-  public GitWebhookDto {
-    Objects.requireNonNull(provider);
-    Objects.requireNonNull(repo);
-    Objects.requireNonNull(baseSha);
-    Objects.requireNonNull(headSha);
-    Objects.requireNonNull(action);
+public record GitWebhookDto(@NotNull GitProviderType provider, long prNumber, @NotNull String repo,
+                            @NotNull String baseSha, @NotNull String headSha, @NotNull String action) {
 
-  }
 }

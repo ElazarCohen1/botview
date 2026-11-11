@@ -3,6 +3,7 @@ package fr.uge.controller;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.GitProviderType;
 import fr.uge.git.model.WebHooksDto;
+import fr.uge.review.ReviewQueue;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
@@ -11,15 +12,18 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Controller("/api/hooks")
 @ExecuteOn(TaskExecutors.BLOCKING)
 public class WebHooksController {
   private final GitProviderFactory factoryProvider;
+  private final ReviewQueue queue;
 
-  public WebHooksController(GitProviderFactory factoryProvider) {
+  public WebHooksController(GitProviderFactory factoryProvider, ReviewQueue queue) {
     Objects.requireNonNull(factoryProvider);
     this.factoryProvider = factoryProvider;
+    this.queue = queue;
     super();
   }
 
@@ -38,7 +42,16 @@ public class WebHooksController {
           HttpHeaders headers
   ) {
     var git = factoryProvider.getProvider(provider);
-    git.parseWebhook(headers, rawBody);
-    return HttpResponse.ok();
+    // add the webhook to the list for the review
+    try {
+      git.parseWebhook(headers, rawBody)
+              // for doing a reviews only on opened and push on the pull request not the closed etc
+              .filter(e -> Set.of("opened", "synchronize", "reopened").contains(e.action()))
+              .ifPresent(queue::submit);
+
+    } catch (IllegalArgumentException e) {
+      return HttpResponse.badRequest();
+    }
+    return HttpResponse.accepted();
   }
 }

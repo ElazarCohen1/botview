@@ -26,4 +26,7 @@ public interface GitProvider {
   GitRepoDto getRepository(String repoName);
 
   Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody);
+
+  CloneParams cloneSpec(GitWebhookDto event);
+
 }

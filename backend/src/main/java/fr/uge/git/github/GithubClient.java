@@ -29,7 +29,7 @@ public class GithubClient {
   private final ObjectMapper mapper;
   private final Database db;
 
-  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper,Database db) {
+  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db) {
     Objects.requireNonNull(client);
     Objects.requireNonNull(mapper);
     Objects.requireNonNull(db);
@@ -115,8 +115,6 @@ public class GithubClient {
     return client.retrieve(post(path, token, body), WebHooksDto.class);
   }
 
-
-
   public HttpResponse<?> removeWebhookFromRepository(int repoId, String token) {
     Objects.requireNonNull(token);
 
@@ -177,6 +175,7 @@ public class GithubClient {
       return Optional.of(
               new GitWebhookDto(
                       GitProviderType.GITHUB,
+                      dto.pullRequest().number(),
                       dto.repository().fullName(),
                       dto.pullRequest().base().sha(),
                       dto.pullRequest().head().sha(),

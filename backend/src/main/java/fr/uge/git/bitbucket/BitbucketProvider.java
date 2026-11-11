@@ -67,5 +67,10 @@ public class BitbucketProvider implements GitProvider {
     return Optional.empty();
   }
 
+  @Override
+  public CloneParams cloneSpec(GitWebhookDto event) {
+    return null;
+  }
+
 
 }

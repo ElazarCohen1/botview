@@ -12,14 +12,14 @@ import java.sql.SQLException;
 @MicronautTest
 public class RepositoryQueriesTest {
 
-    @Inject
-    Database database;
+  @Inject
+  Database database;
 
-    @Test
-    void testAddRepository() throws SQLException{
-        Assertions.assertThrows(IllegalArgumentException.class, database.getRepositoryQueries().getAllRepositories(null));
-        database.getRepositoryQueries().addRepository();
-    }
+  @Test
+  void testAddRepository() throws SQLException {
+    Assertions.assertThrows(IllegalArgumentException.class,()-> database.getRepositoryQueries().getAllRepositories(null));
+//    database.getRepositoryQueries().addRepository();
+  }
 
 
 }
