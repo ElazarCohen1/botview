@@ -10,7 +10,7 @@ import java.io.IOException;
 @Singleton
 public class SandboxInitializer {
 
-  private static final String BWRAP = "/usr/bin/bwrap";
+  private static final String BWRAP = "bwrap";
 
   @EventListener
   public void initSandbox(StartupEvent event) {
