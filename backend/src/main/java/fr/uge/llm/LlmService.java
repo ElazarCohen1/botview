@@ -13,7 +13,6 @@ import java.util.Objects;
 @Requires(notEnv = "test")
 @Context
 @Singleton
-@Requires(notEnv = "test")
 public class LlmService {
   // value get the value from the application.yml
   private final LlmInitialiser initialiser;

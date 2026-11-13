@@ -6,12 +6,14 @@ import fr.uge.analysis.RepoCloner;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.model.GitWebhookDto;
 import fr.uge.llm.LlmService;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 
 @Singleton
+@Requires(notEnv = "test")
 public class ReviewWorker {
 
   private final ReviewQueue queue;
@@ -40,7 +42,7 @@ public class ReviewWorker {
 
   private void consumeQueue() {
     try {
-      while (!Thread.currentThread().isInterrupted()) {
+      while (!Thread.interrupted()) {
         var job = queue.take();
         try {
           process(job);

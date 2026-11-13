@@ -67,6 +67,7 @@ public class RepositoryQueries {
     Objects.requireNonNull(name);
     Objects.requireNonNull(url);
     Objects.requireNonNull(provider);
+    Objects.requireNonNull(webhookId);
     try (Connection conn = dataSource.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement("INSERT INTO REPOSITORY (name,url,origin,has_webhook,webhook_id) VALUES ( ?, ?, ? ,?,?)");
       stmt.setString(1, name);
