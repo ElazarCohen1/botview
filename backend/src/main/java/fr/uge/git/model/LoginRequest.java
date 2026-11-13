@@ -3,7 +3,7 @@ package fr.uge.git.model;
 import java.util.Objects;
 
 public record LoginRequest(String token) {
-  public LoginRequest{
+  public LoginRequest {
     Objects.requireNonNull(token);
   }
 }

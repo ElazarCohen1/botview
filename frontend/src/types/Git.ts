@@ -6,6 +6,6 @@ export interface GitUserDto {
 
 export enum GitProviderEnum {
     GITHUB = "GITHUB",
-    GITLAB= "GITLAB",
-    BITBUCKET= "BITBUCKET",
+    GITLAB = "GITLAB",
+    BITBUCKET = "BITBUCKET",
 }

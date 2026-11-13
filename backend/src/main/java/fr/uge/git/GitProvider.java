@@ -1,30 +1,32 @@
 package fr.uge.git;
 
 
-import fr.uge.git.model.GitPullRequestDto;
-import fr.uge.git.model.GitRepoDto;
-import fr.uge.git.model.GitUserDto;
-import fr.uge.git.model.WebHooksDto;
-import io.micronaut.core.type.Argument;
+import fr.uge.git.model.*;
+import io.micronaut.http.HttpHeaders;
+import io.micronaut.http.HttpResponse;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 
 public interface GitProvider {
   GitUserDto getUser();
 
-  void saveToken(String token);
-
   String getToken();
 
+  void addRepository(String repoName);
+
+  HttpResponse<?> removeWebhookFromRepository(int repoId);
+
   List<GitRepoDto> getRepositories();
+
   List<GitPullRequestDto> getPullRequests(String repoName);
 
   List<WebHooksDto> getWebHooks(String repoName);
 
-  WebHooksDto createWebhook (String repoName);
-
   GitRepoDto getRepository(String repoName);
+
+  Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody);
+
+  CloneParams cloneSpec(GitWebhookDto event);
 
 }

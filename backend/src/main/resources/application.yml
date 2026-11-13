@@ -27,9 +27,14 @@ micronaut:
 
     intercept-url-map:
       - pattern: /**
-        access: [isAnonymous()]
+        access: [ isAnonymous() ]
+
 github:
   token: ${GITHUB_TOKEN:}
+gitlab:
+  token: ${GITLAB_TOKEN:}
+bitbucket:
+  token: ${BITBUCKET_TOKEN:}
 
 ngrok:
   enabled: true
@@ -37,6 +42,7 @@ ngrok:
 llm:
   model-url: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
   model-path: ${LLM_MODEL_PATH:./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf}
+
 
 datasources:
   default:

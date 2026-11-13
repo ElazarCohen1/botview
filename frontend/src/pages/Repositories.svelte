@@ -1,88 +1,113 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import Button from "../components/button/Button.svelte";
+    import {onMount} from "svelte";
     import RepoSelect from "../components/common/RepoSelect.svelte";
-    import RepositoryItem from "../components/repos/RepositoryItem.svelte";
+    import {addRepository, getRepositories, removeWebhook} from "../api/repositories/repositories";
+    import type {Repository} from "../types/Repository";
+    import {gitProvider} from "../lib/stores.svelte";
     import EmptyState from "../components/common/EmptyState.svelte";
-    import { getWebHooks, createWebHook } from "../api/webhook/webHooks";
-    import {
-        getRepositoriesFromDb,
-        addRepositoryToDb,
-        deleteRepositoryFromDb,
-    } from "../api/repositories/repositories";
+    import RepositoryItem from "../components/repos/RepositoryItem.svelte";
 
-    let selectedRepoName = $state("");
-    let chosenRepos = $state([]);
-    let loading = $state(true);
+    let selectedRepo: Repository | null = $state(null);
+    let monitoredRepos: Repository[] = $state([]);
+    let resMessage: string = $state("");
+    let loading: boolean = $state(true);
+    let busy: boolean = $state(false);
 
-    async function refresh() {
+    let selectedAlreadyMonitored = $derived(
+        selectedRepo !== null &&
+        monitoredRepos.some(r => r.name === selectedRepo!.full_name || r.url === selectedRepo!.url)
+    );
+
+    function errorMessage(e: unknown): string {
+        return e instanceof Error ? e.message : "Une erreur inattendue est survenue.";
+    }
+
+    async function loadRepos() {
         loading = true;
-        const data = await getRepositoriesFromDb();
-        if (data && data.length > 0) {
-            chosenRepos = data;
+        try {
+            const all = await getRepositories(gitProvider.selected!);
+            monitoredRepos = all.filter(r => r.has_webhook);
+        } catch (e) {
+            resMessage = errorMessage(e);
+        } finally {
+            loading = false;
         }
-        loading = false;
-    }
-    function hasPullRequestWebHook(webHooks) {
-        if (!webHooks) return false;
-        return webHooks.some((hook) => hook.events?.includes("pull_request"));
-    }
-    async function addWebhook(repoName: string) {
-        await createWebHook(repoName);
-        await refresh();
-    }
-    async function addSelectedRepo() {
-        if (!selectedRepoName) return;
-        await createWebHook(selectedRepoName);
-        await addRepositoryToDb(selectedRepoName);
-        await refresh();
-    }
-    async function removeRepo(repoName: string) {
-        await deleteRepositoryFromDb(repoName);
-        await refresh();
     }
 
-    onMount(refresh);
+    async function addWebhook(repo: Repository) {
+        resMessage = "";
+        busy = true;
+        try {
+            await addRepository(repo.full_name, gitProvider.selected!);
+            await loadRepos();
+            selectedRepo = null;
+        } catch (e) {
+            resMessage = errorMessage(e);
+        } finally {
+            busy = false;
+        }
+    }
+
+    async function deleteWebhook(repo: Repository) {
+        resMessage = "";
+        busy = true;
+        try {
+            await removeWebhook(repo.id.toString(), gitProvider.selected!);
+            await loadRepos();
+        } catch (e) {
+            resMessage = errorMessage(e);
+        } finally {
+            busy = false;
+        }
+    }
+
+    onMount(loadRepos);
 </script>
 
 <div>
     <h2>Mes Dépôts</h2>
 
-    <div class="d-flex align-items-center gap-3 my-4">
-        <label for="repo-select" class="fw-semibold">Choisir un dépôt :</label>
-        <RepoSelect bind:bindValue={selectedRepoName} />
-        <Button text="Ajouter à la liste" onClick={addSelectedRepo} />
-    </div>
-    <h4 class="mt-4 mb-3">Dépôts choisis ({chosenRepos.length})</h4>
-    {#if loading && chosenRepos.length === 0}
-        <p>Chargement...</p>
-    {:else if chosenRepos.length === 0}
-        <EmptyState
-            message="Aucun dépôt affiché pour le moment. Choisissez-en un ci-dessus pour l'ajouter."
-        />
-    {:else}
-        {#each chosenRepos as repo}
-            {#await getWebHooks(repo.name) then dataWebhooks}
-                <div class="mb-3">
-                    <RepositoryItem {repo} />
-                    {#if !hasPullRequestWebHook(dataWebhooks)}
-                        <Button
-                            text="Ajouter Webhook"
-                            onClick={() => addWebhook(repo.name)}
-                        />
-                    {:else}
-                        <p class="text-success mt-2">
-                            Vous avez déjà un webhook
-                        </p>
-                    {/if}
-                    <button
-                        class="btn btn-sm btn-outline-danger"
-                        onclick={() => removeRepo(repo.name)}
-                    >
-                        Supprimer de la liste
-                    </button>
-                </div>
-            {/await}
-        {/each}
+    {#if resMessage}
+        <div class="alert alert-danger">{resMessage}</div>
     {/if}
+
+    <section class="mb-5">
+        <h4 class="mt-4 mb-3">Ajouter un dépôt</h4>
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <label class="fw-semibold" for="repo-select">Choisir un dépôt :</label>
+            <RepoSelect bind:bindValue={selectedRepo}/>
+        </div>
+
+        {#if selectedRepo}
+            {#if selectedAlreadyMonitored}
+                <div class="alert alert-info">Ce dépôt a déjà un webhook actif.</div>
+            {:else}
+                <RepositoryItem
+                        repo={selectedRepo}
+                        hasWebhook={false}
+                        {busy}
+                        onAddWebhook={() => addWebhook(selectedRepo!)}
+                />
+            {/if}
+        {/if}
+    </section>
+
+    <section>
+        <h4 class="mb-3">Webhook actif ({monitoredRepos.length})</h4>
+        {#if loading && monitoredRepos.length === 0}
+            <p>Chargement...</p>
+        {:else if monitoredRepos.length === 0}
+            <EmptyState
+                    message="Aucun dépôt surveillé pour le moment. Choisissez-en un ci-dessus pour activer un webhook."/>
+        {:else}
+            {#each monitoredRepos as repo (repo.id)}
+                <RepositoryItem
+                        {repo}
+                        hasWebhook={true}
+                        {busy}
+                        onRemoveWebhook={() => deleteWebhook(repo)}
+                />
+            {/each}
+        {/if}
+    </section>
 </div>

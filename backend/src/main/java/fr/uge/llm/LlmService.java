@@ -1,7 +1,6 @@
 package fr.uge.llm;
 
 import de.kherud.llama.InferenceParameters;
-import de.kherud.llama.LlamaModel;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import jakarta.annotation.PostConstruct;
@@ -9,8 +8,8 @@ import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 
 import java.io.IOException;
-
 import java.util.Objects;
+
 @Requires(notEnv = "test")
 @Context
 @Singleton
@@ -19,14 +18,15 @@ public class LlmService {
   // value get the value from the application.yml
   private final LlmInitialiser initialiser;
   private Thread loaderThread;
-  public LlmService(LlmInitialiser initialiser){
+
+  public LlmService(LlmInitialiser initialiser) {
     this.initialiser = initialiser;
     super();
   }
 
   @PostConstruct
   void init() {
-    loaderThread =  Thread.ofPlatform().daemon().start(()->{
+    loaderThread = Thread.ofPlatform().daemon().start(() -> {
       try {
         initialiser.initialiseModel();
       } catch (IOException | InterruptedException e) {
@@ -39,7 +39,7 @@ public class LlmService {
   public String complete(String prompt) {
     Objects.requireNonNull(prompt);
     try {
-      LlamaModel model = initialiser.getModel();
+      var model = initialiser.getModel();
       return model.complete(new InferenceParameters(prompt).setNPredict(512));
 
     } catch (InterruptedException e) {
