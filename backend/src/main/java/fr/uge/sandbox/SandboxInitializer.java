@@ -1,4 +1,3 @@
-
 package fr.uge.sandbox;
 
 import io.micronaut.context.event.StartupEvent;
