@@ -88,6 +88,12 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
+  public  String getPullRequestDiff(String repoName, long prNumber){
+    Objects.requireNonNull(repoName);
+    return client.getPullRequestDiff(repoName, prNumber, this.token);
+  }
+
+  @Override
   public CloneParams cloneSpec(GitWebhookDto event) {
     if (token.isBlank()) {
       throw new IllegalStateException(

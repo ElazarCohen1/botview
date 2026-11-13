@@ -72,5 +72,10 @@ public class BitbucketProvider implements GitProvider {
     return null;
   }
 
+  @Override
+  public String getPullRequestDiff(String repoName, long prNumber) {
+    return "";
+  }
+
 
 }

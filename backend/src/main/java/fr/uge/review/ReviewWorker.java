@@ -11,6 +11,8 @@ import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 
+import java.util.Objects;
+
 @Singleton
 public class ReviewWorker {
 
@@ -22,7 +24,8 @@ public class ReviewWorker {
 
   private Thread workerThread;
 
-  public ReviewWorker(ReviewQueue queue, GitProviderFactory factory, RepoCloner cloner, AnalysisRunner analysisRunner, LlmService llm) {
+  public ReviewWorker(ReviewQueue queue, GitProviderFactory factory, RepoCloner cloner, AnalysisRunner analysisRunner,
+      LlmService llm) {
     this.queue = queue;
     this.factory = factory;
     this.cloner = cloner;
@@ -34,8 +37,8 @@ public class ReviewWorker {
   @EventListener
   public void onApplicationEvent(StartupEvent event) {
     workerThread = Thread.ofPlatform()
-            .name("review-worker")
-            .start(this::consumeQueue);
+        .name("review-worker")
+        .start(this::consumeQueue);
   }
 
   private void consumeQueue() {
@@ -53,16 +56,29 @@ public class ReviewWorker {
     }
   }
 
+
+
+  private  String generatePrompt(String fileDiff, String staticAnalysis){
+    Objects.requireNonNull(fileDiff);
+    Objects.requireNonNull(staticAnalysis);
+    return " Analyse la différence entre les 2  commits ainsi que le résultats de l'analyse statique\n." +
+            " Voici les différences : \n" + fileDiff  +
+            "\net voici les analyses : \n" + staticAnalysis;
+  }
+
   private void process(GitWebhookDto event) throws Exception {
     var git = factory.getProvider(event.provider());
     var fileName = event.repo().replace('/', '_') + "-"
-            + event.prNumber() + "-"
-            + event.headSha().substring(0, 7);
+        + event.prNumber() + "-"
+        + event.headSha().substring(0, 7);
 
     var dir = cloner.clone(git.cloneSpec(event), fileName);
     try {
       var results = analysisRunner.run(dir);
       results.forEach(IO::println);
+      var diff = git.getPullRequestDiff(event.repo(), event.prNumber());
+      var response = llm.complete(generatePrompt(diff,results.toString()));
+      IO.println(response);
     } finally {
       cloner.delete(dir);
     }

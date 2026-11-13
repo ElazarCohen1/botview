@@ -22,12 +22,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-
 @Singleton
 public class GithubClient {
   private final BlockingHttpClient client;
   private final ObjectMapper mapper;
   private final Database db;
+  private  final static String ACCEPT_JSON = "application/vnd.github+json";
+  private final static String ACCEPT_DIFF = "application/vnd.github.diff";
 
   public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db) {
     Objects.requireNonNull(client);
@@ -39,24 +40,25 @@ public class GithubClient {
     super();
   }
 
-  private HttpRequest<?> get(String path, String token) {
+  private HttpRequest<?> get(String path, String token, String acceptHeaderValue) {
     Objects.requireNonNull(path);
     Objects.requireNonNull(token);
 
     return HttpRequest.GET(path)
-            .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/vnd.github+json")
-            .header("User-Agent", "pr-review-bot");
+        .header("Authorization", "Bearer " + token)
+        .header("Accept", acceptHeaderValue)
+        .header("User-Agent", "pr-review-bot");
   }
+
 
   private HttpRequest<?> post(String path, String token, Map<String, Object> body) {
     Objects.requireNonNull(path);
     Objects.requireNonNull(token);
 
     return HttpRequest.POST(path, body)
-            .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/vnd.github+json")
-            .header("User-Agent", "pr-review-bot");
+        .header("Authorization", "Bearer " + token)
+        .header("Accept", "application/vnd.github+json")
+        .header("User-Agent", "pr-review-bot");
   }
 
   private HttpRequest<?> delete(String path, String token) {
@@ -64,40 +66,40 @@ public class GithubClient {
     Objects.requireNonNull(token);
 
     return HttpRequest.DELETE(path)
-            .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/vnd.github+json")
-            .header("User-Agent", "pr-review-bot");
+        .header("Authorization", "Bearer " + token)
+        .header("Accept", "application/vnd.github+json")
+        .header("User-Agent", "pr-review-bot");
   }
 
   public GitUserDto getUser(String token) {
     Objects.requireNonNull(token);
-    return client.retrieve(get("/user", token), GitUserDto.class);
+    return client.retrieve(get("/user", token,ACCEPT_JSON), GitUserDto.class);
   }
 
   public List<GitRepoDto> getRepositories(String token) {
     Objects.requireNonNull(token);
-    return client.retrieve(get("/user/repos", token), Argument.listOf(GitRepoDto.class));
+    return client.retrieve(get("/user/repos", token, ACCEPT_JSON), Argument.listOf(GitRepoDto.class));
   }
 
   public List<GitPullRequestDto> getPullRequests(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName + "/pulls";
-    return client.retrieve(get(path, token), Argument.listOf(GitPullRequestDto.class));
+    return client.retrieve(get(path, token, ACCEPT_JSON), Argument.listOf(GitPullRequestDto.class));
   }
 
   public GitRepoDto getRepository(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName;
-    return client.retrieve(get(path, token), GitRepoDto.class);
+    return client.retrieve(get(path, token, ACCEPT_JSON), GitRepoDto.class);
   }
 
   public List<WebHooksDto> getWebHooks(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName + "/hooks";
-    return client.retrieve(get(path, token), Argument.listOf(WebHooksDto.class));
+    return client.retrieve(get(path, token, ACCEPT_JSON), Argument.listOf(WebHooksDto.class));
   }
 
   public WebHooksDto createWebhook(String repoName, String token) {
@@ -105,13 +107,13 @@ public class GithubClient {
     Objects.requireNonNull(token);
     String path = "/repos/" + repoName + "/hooks";
     Map<String, Object> body = Map.of(
-            "name", "web",
-            "active", true,
-            "events", List.of("pull_request"),
-            "config", Map.of(
-                    "url", "https://upscale-sixfold-extruding.ngrok-free.dev/api/hooks/receive/GITHUB",
-                    "content_type", "json",
-                    "insecure_ssl", "0"));
+        "name", "web",
+        "active", true,
+        "events", List.of("pull_request"),
+        "config", Map.of(
+            "url", "https://upscale-sixfold-extruding.ngrok-free.dev/api/hooks/receive/GITHUB",
+            "content_type", "json",
+            "insecure_ssl", "0"));
     return client.retrieve(post(path, token, body), WebHooksDto.class);
   }
 
@@ -173,20 +175,24 @@ public class GithubClient {
         return Optional.empty();
       }
       return Optional.of(
-              new GitWebhookDto(
-                      GitProviderType.GITHUB,
-                      dto.pullRequest().number(),
-                      dto.repository().fullName(),
-                      dto.pullRequest().base().sha(),
-                      dto.pullRequest().head().sha(),
-                      dto.action()
-              )
-      );
+          new GitWebhookDto(
+              GitProviderType.GITHUB,
+              dto.pullRequest().number(),
+              dto.repository().fullName(),
+              dto.pullRequest().base().sha(),
+              dto.pullRequest().head().sha(),
+              dto.action()));
     } catch (IOException e) {
       throw new IllegalArgumentException("Webhook GitHub invalide", e);
     }
   }
 
+  public String getPullRequestDiff(String repoFullName, long pullNumber, String token) {
+    Objects.requireNonNull(repoFullName);
+    Objects.requireNonNull(token);
+
+    String path = "/repos/" + repoFullName + "/pulls/" + pullNumber;
+    return client.retrieve(get(path, token,ACCEPT_DIFF), String.class);
+  }
+
 }
-
-
