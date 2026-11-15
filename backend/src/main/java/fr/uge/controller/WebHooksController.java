@@ -48,7 +48,6 @@ public class WebHooksController {
               // for doing a reviews only on opened and push on the pull request not the closed etc
               .filter(e -> Set.of("opened", "synchronize", "reopened").contains(e.action()))
               .ifPresent(queue::submit);
-
     } catch (IllegalArgumentException e) {
       return HttpResponse.badRequest();
     }

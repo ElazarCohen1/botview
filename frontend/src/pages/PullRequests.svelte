@@ -6,24 +6,25 @@
 
 
     let pullRequests: PullRequest[] = $state([]);
-    let repoName: string = $state("");
+    let repoId: number = $state(-1);
     let loading: boolean = $state(true);
     let error: string = $state("");
+
 
     onMount(async () => {
         const hash = window.location.hash;
         const params = new URLSearchParams(
             hash.includes("?") ? hash.split("?")[1] : "",
         );
-        repoName = params.get("repo") || "";
+        repoId = parseInt(params.get("repo") || "-1");
 
-        if (!repoName) {
+        if (!repoId) {
             error = "Aucun dépôt spécifié.";
             loading = false;
             return;
         }
 
-        const data = await getPullRequest(repoName);
+        const data = await getPullRequest(repoId);
         if (data) {
             pullRequests = data;
         } else {
@@ -35,7 +36,7 @@
 
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Pull Requests : {repoName}</h2>
+        <h2>Pull Requests : {repoId}</h2>
         <a class="btn btn-sm btn-outline-secondary" href="#/repositories">
             ← Retour aux dépôts
         </a>

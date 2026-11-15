@@ -35,7 +35,7 @@
     <div class="d-flex flex-wrap gap-2">
         <a
                 class="btn btn-sm btn-primary"
-                href="#/pull-requests?repo={repo.name}"
+                href="#/pull-requests?repo={repo.id}"
         >
             Voir les Pull Requests
         </a>

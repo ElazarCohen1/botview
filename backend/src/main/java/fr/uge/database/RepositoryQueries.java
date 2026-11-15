@@ -29,7 +29,7 @@ public class RepositoryQueries {
   @Transactional
   public Optional<RepositoryDto> getRepository(int repId) throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      PreparedStatement stmt = conn.prepareStatement("SELECT id, name, url, origin,has_webhook from REPOSITORY where id = ?");
+      var stmt = conn.prepareStatement("SELECT id, name, url, origin,has_webhook from REPOSITORY where id = ?");
       stmt.setInt(1, repId);
       ResultSet res = stmt.executeQuery();
       if (!res.next()) {

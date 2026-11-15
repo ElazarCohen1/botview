@@ -177,9 +177,11 @@ public class GithubClient {
                       GitProviderType.GITHUB,
                       dto.pullRequest().number(),
                       dto.repository().fullName(),
+                      dto.pullRequest().url(),
                       dto.pullRequest().base().sha(),
                       dto.pullRequest().head().sha(),
-                      dto.action()
+                      dto.action(),
+                      dto.repository().htmlUrl()
               )
       );
     } catch (IOException e) {
