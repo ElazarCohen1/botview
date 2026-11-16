@@ -19,7 +19,7 @@ record GitHubWebhookDto(@NotNull String action, @NotNull @JsonProperty("pull_req
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record PullRequest(int number, @NotNull Ref head, @NotNull Ref base, @JsonProperty("url") String diffUrl) {
+  record PullRequest(int number,@JsonProperty("html_url") @NotNull String url, @NotNull Ref head, @NotNull Ref base, @JsonProperty("url") String diffUrl) {
   }
 
   @Serdeable
@@ -29,6 +29,7 @@ record GitHubWebhookDto(@NotNull String action, @NotNull @JsonProperty("pull_req
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record Repository(@JsonProperty("full_name") @NotNull String fullName) {
+  record Repository(@JsonProperty("full_name") @NotNull String fullName,
+                    @JsonProperty("html_url") @NotNull String htmlUrl) {
   }
 }

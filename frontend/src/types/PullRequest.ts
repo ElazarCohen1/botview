@@ -1,6 +1,10 @@
 export interface PullRequest {
+    pullId: number;
     number: number;
-    title: string;
-    state: string;
-    html_url: string;
+    name: string;
+    url: string;
+    createdAt: string;
+    updatedAt: string;
+    repositoryId: number;
+    action: string;
 }

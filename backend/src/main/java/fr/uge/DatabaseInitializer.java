@@ -43,7 +43,7 @@ public class DatabaseInitializer {
 
   private void createEnums(Connection conn, Statement stmt) throws SQLException {
     createEnumIfAbsent(conn, stmt, "gitProvider", "'GITHUB', 'GITLAB', 'BITBUCKET'");
-    createEnumIfAbsent(conn, stmt, "pr_status", "'OPEN', 'MERGED', 'CLOSED'");
+    createEnumIfAbsent(conn, stmt, "pr_status", "'OPENED','SYNCHRONIZE', 'REOPENED'");
     createEnumIfAbsent(conn, stmt, "review_status", "'PENDING', 'RUNNING', 'DONE', 'FAILED'");
     createEnumIfAbsent(conn, stmt, "analysis_status", "'PENDING', 'RUNNING', 'DONE', 'FAILED'");
     createEnumIfAbsent(conn, stmt, "change_status", "'ADDED', 'MODIFIED', 'DELETED', 'RENAMED'");
@@ -83,13 +83,17 @@ public class DatabaseInitializer {
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS PULL_REQUEST (
-              id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
-              name           VARCHAR(255) NOT NULL,
-              commit_id      VARCHAR(64) NOT NULL,
-              status         pr_status NOT NULL,
-              created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
-              repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id)
-            )""");
+                id             INTEGER PRIMARY KEY DEFAULT nextval('pull_request_seq'),
+                number         INTEGER NOT NULL,
+                name           VARCHAR(255) NOT NULL,
+                url            VARCHAR(2048) NOT NULL,
+                state          pr_status NOT NULL DEFAULT 'OPEN',
+                created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                updated_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id),
+            
+                UNIQUE(repository_id, number)
+            );""");
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS REVIEW (

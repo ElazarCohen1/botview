@@ -9,12 +9,15 @@
     import RepoCard from '../components/repos/RepoCard.svelte';
     import ReviewTable from '../components/reviews/ReviewTable.svelte';
     import type {Repository} from "../types/Repository";
+    import {getNbPullRequest} from "../api/pullRequest/pullRequest";
 
     let connectedRepos: Repository[] = $state([]);
+    let prAnalysed: number = $state(0);
 
     onMount(async () => {
-        const data: Repository[] = (await getRepositories()).filter(r => r.has_webhook == true);
-        connectedRepos = data ?? [];
+        const repo: Repository[] = (await getRepositories()).filter(r => r.has_webhook == true);
+        connectedRepos = repo ?? [];
+        prAnalysed = await getNbPullRequest();
     });
     let blocking = $derived(reviews.filter((r) => r.blocking).length);
 
@@ -28,7 +31,7 @@
         <StatCard icon="bi-git" label="Repos connectés" value={connectedRepos.length}/>
     </div>
     <div class="col-6 col-lg-3">
-        <StatCard color="info" icon="bi-git" label="PR analysées" value={reviews.length}/>
+        <StatCard color="info" icon="bi-git" label="PR analysées" value={prAnalysed}/>
     </div>
     <div class="col-6 col-lg-3">
         <StatCard color="danger" icon="bi-exclamation-octagon" label="Reviews bloquantes" value={blocking}/>

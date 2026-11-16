@@ -178,14 +178,16 @@ public class GithubClient {
         return Optional.empty();
       }
       return Optional.of(
-          new GitWebhookDto(
-              GitProviderType.GITHUB,
-              dto.pullRequest().number(),
-              dto.repository().fullName(),
-              dto.pullRequest().base().sha(),
-              dto.pullRequest().head().sha(),
-              dto.action(),
-              dto.pullRequest().diffUrl())
+              new GitWebhookDto(
+                      GitProviderType.GITHUB,
+                      dto.pullRequest().number(),
+                      dto.repository().fullName(),
+                      dto.pullRequest().url(),
+                      dto.pullRequest().base().sha(),
+                      dto.pullRequest().head().sha(),
+                      dto.action(),
+                      dto.repository().htmlUrl(),
+                      dto.pullRequest().diffUrl())
       );
 
     } catch (IOException e) {
