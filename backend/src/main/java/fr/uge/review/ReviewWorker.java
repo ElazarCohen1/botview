@@ -76,7 +76,8 @@ public class ReviewWorker {
     try {
       var results = analysisRunner.run(dir);
       results.forEach(IO::println);
-      var diff = git.getPullRequestDiff(event.repo(), event.prNumber());
+      var diff = git.getPullRequestDiff(event.diffUrl());
+      IO.println(diff);
       var response = llm.complete(generatePrompt(diff,results.toString()));
       IO.println(response);
     } finally {

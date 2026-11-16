@@ -88,9 +88,9 @@ public class GithubProvider implements GitProvider {
   }
 
   @Override
-  public  String getPullRequestDiff(String repoName, long prNumber){
-    Objects.requireNonNull(repoName);
-    return client.getPullRequestDiff(repoName, prNumber, this.token);
+  public  String getPullRequestDiff(String diffUrl){
+    Objects.requireNonNull(diffUrl);
+    return client.getPullRequestDiff(diffUrl, this.token);
   }
 
   @Override
