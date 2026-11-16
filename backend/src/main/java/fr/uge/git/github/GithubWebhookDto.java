@@ -19,7 +19,7 @@ record GitHubWebhookDto(@NotNull String action, @NotNull @JsonProperty("pull_req
 
   @Serdeable
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record PullRequest(int number, @JsonProperty("html_url") @NotNull String url, @NotNull Ref head, @NotNull Ref base) {
+  record PullRequest(int number,@JsonProperty("html_url") @NotNull String url, @NotNull Ref head, @NotNull Ref base, @JsonProperty("url") String diffUrl) {
   }
 
   @Serdeable

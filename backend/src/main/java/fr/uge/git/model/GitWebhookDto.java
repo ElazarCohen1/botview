@@ -16,6 +16,6 @@ import jakarta.validation.constraints.NotNull;
 @Serdeable
 public record GitWebhookDto(@NotNull GitProviderType provider, long prNumber, @NotNull String repo,
                             @NotNull String PullRequestUrl, @NotNull String baseSha,
-                            @NotNull String headSha, @NotNull String action, @NotNull String repoUrl) {
+                            @NotNull String headSha, @NotNull String action, @NotNull String repoUrl,@NotNull String diffUrl) {
 
 }

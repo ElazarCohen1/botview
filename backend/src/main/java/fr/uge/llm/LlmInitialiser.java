@@ -67,8 +67,6 @@ public class LlmInitialiser {
           initializationError = e;
           status = Status.FAILED;
         }
-        initializationError = e;
-        status = Status.FAILED;
         condition.signalAll();
       } finally {
         lock.unlock();

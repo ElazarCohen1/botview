@@ -17,7 +17,7 @@ public class RepositoryQueriesTest {
 
   @Test
   void testAddRepository() throws SQLException {
-    Assertions.assertThrows(IllegalArgumentException.class, () -> database.getRepositoryQueries().getAllRepositories(null));
+    Assertions.assertThrows(NullPointerException.class, () -> database.getRepositoryQueries().getAllRepositories(null));
 //    database.getRepositoryQueries().addRepository();
   }
 

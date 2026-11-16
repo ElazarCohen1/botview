@@ -72,4 +72,9 @@ public class GitlabProvider implements GitProvider {
     return null;
   }
 
+  @Override
+  public  String getPullRequestDiff(String diffUrl) {
+    return "";
+  }
+
 }
