@@ -36,13 +36,32 @@ public class LlmService {
 
   }
 
-  public String complete(String prompt) {
-    Objects.requireNonNull(prompt);
+  public String complete(String systemPrompt, String userContent) {
+    Objects.requireNonNull(systemPrompt);
+    Objects.requireNonNull(userContent);
+
     try {
       var model = initialiser.getModel();
-      return model.complete(new InferenceParameters(prompt).setNPredict(512));
+
+      var prompt = """
+              <|im_start|>system
+              %s<|im_end|>
+              <|im_start|>user
+              %s<|im_end|>
+              <|im_start|>assistant
+              """.formatted(systemPrompt, userContent);
+
+      var params = new InferenceParameters(prompt)
+              .setNPredict(1024)
+              .setTemperature(0.1f)
+              .setTopP(0.9f)
+              .setRepeatPenalty(1.1f)
+              .setStopStrings("<|im_end|>");
+
+      return model.complete(params);
 
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       throw new RuntimeException(e);
     }
   }

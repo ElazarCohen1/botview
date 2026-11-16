@@ -100,7 +100,10 @@ public class SandboxRunner {
 
   private void configureIsolation(List<String> args) {
     args.addAll(List.of(
-            "--unshare-all",
+            "--unshare-user",
+            "--unshare-pid",
+            "--unshare-ipc",
+            "--unshare-uts",
             "--die-with-parent",
             "--new-session"
     ));
@@ -114,9 +117,10 @@ public class SandboxRunner {
     bindReadOnly(args, "/lib");
     bindReadOnly(args, "/lib64");
     bindReadOnly(args, "/etc");
+    bindReadOnly(args, "/run/systemd/resolve");
 
     configureJdk(args);
-    configureMavenCache(args);
+//    configureMavenCache(args);
     configureVirtualFilesystems(args);
     configureWorkspace(args, project);
   }
