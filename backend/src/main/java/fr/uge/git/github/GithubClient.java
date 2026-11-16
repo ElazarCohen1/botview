@@ -3,6 +3,7 @@ package fr.uge.git.github;
 import fr.uge.database.Database;
 import fr.uge.git.GitProviderType;
 import fr.uge.git.model.*;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpRequest;
@@ -29,14 +30,15 @@ public class GithubClient {
   private final Database db;
   private  final static String ACCEPT_JSON = "application/vnd.github+json";
   private final static String ACCEPT_DIFF = "application/vnd.github.diff";
-
-  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db) {
+  private final String ngrokUrl;
+  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db, @Value("${ngrok.url}") String url) {
     Objects.requireNonNull(client);
     Objects.requireNonNull(mapper);
     Objects.requireNonNull(db);
     this.mapper = mapper;
     this.db = db;
     this.client = client.toBlocking();
+    this.ngrokUrl = url;
     super();
   }
 
@@ -111,7 +113,7 @@ public class GithubClient {
         "active", true,
         "events", List.of("pull_request"),
         "config", Map.of(
-            "url", "https://upscale-sixfold-extruding.ngrok-free.dev/api/hooks/receive/GITHUB",
+            "url", "https://" +ngrokUrl + "/api/hooks/receive/GITHUB",
             "content_type", "json",
             "insecure_ssl", "0"));
     return client.retrieve(post(path, token, body), WebHooksDto.class);

@@ -25,7 +25,6 @@ public class ConnectNgrok implements ApplicationEventListener<StartupEvent> {
   public void onApplicationEvent(@NonNull StartupEvent event) {
     try {
       var session = Session.withAuthtokenFromEnv().connect();
-      IO.println(url);
       var forwarder = session.httpEndpoint()
               .domain(url)
               .forward(new URI("http://localhost:8080").toURL());
