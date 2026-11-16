@@ -4,6 +4,7 @@ package fr.uge.git;
 import fr.uge.git.model.*;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,5 +29,6 @@ public interface GitProvider {
   Optional<GitWebhookDto> parseWebhook(HttpHeaders headers, String rawBody);
 
   CloneParams cloneSpec(GitWebhookDto event);
+  String getPullRequestDiff(String diffUrl);
 
-}
+  }
