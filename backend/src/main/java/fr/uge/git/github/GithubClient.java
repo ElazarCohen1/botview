@@ -3,6 +3,7 @@ package fr.uge.git.github;
 import fr.uge.database.Database;
 import fr.uge.git.GitProviderType;
 import fr.uge.git.model.*;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpRequest;
@@ -22,32 +23,36 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-
 @Singleton
 public class GithubClient {
+  private final static String ACCEPT_JSON = "application/vnd.github+json";
+  private final static String ACCEPT_DIFF = "application/vnd.github.diff";
   private final BlockingHttpClient client;
   private final ObjectMapper mapper;
   private final Database db;
+  private final String ngrokUrl;
 
-  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db) {
+  public GithubClient(@Client("https://api.github.com") HttpClient client, ObjectMapper mapper, Database db, @Value("${ngrok.url}") String url) {
     Objects.requireNonNull(client);
     Objects.requireNonNull(mapper);
     Objects.requireNonNull(db);
     this.mapper = mapper;
     this.db = db;
     this.client = client.toBlocking();
+    this.ngrokUrl = url;
     super();
   }
 
-  private HttpRequest<?> get(String path, String token) {
+  private HttpRequest<?> get(String path, String token, String acceptHeaderValue) {
     Objects.requireNonNull(path);
     Objects.requireNonNull(token);
 
     return HttpRequest.GET(path)
             .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/vnd.github+json")
+            .header("Accept", acceptHeaderValue)
             .header("User-Agent", "pr-review-bot");
   }
+
 
   private HttpRequest<?> post(String path, String token, Map<String, Object> body) {
     Objects.requireNonNull(path);
@@ -71,33 +76,33 @@ public class GithubClient {
 
   public GitUserDto getUser(String token) {
     Objects.requireNonNull(token);
-    return client.retrieve(get("/user", token), GitUserDto.class);
+    return client.retrieve(get("/user", token, ACCEPT_JSON), GitUserDto.class);
   }
 
   public List<GitRepoDto> getRepositories(String token) {
     Objects.requireNonNull(token);
-    return client.retrieve(get("/user/repos", token), Argument.listOf(GitRepoDto.class));
+    return client.retrieve(get("/user/repos", token, ACCEPT_JSON), Argument.listOf(GitRepoDto.class));
   }
 
   public List<GitPullRequestDto> getPullRequests(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName + "/pulls";
-    return client.retrieve(get(path, token), Argument.listOf(GitPullRequestDto.class));
+    return client.retrieve(get(path, token, ACCEPT_JSON), Argument.listOf(GitPullRequestDto.class));
   }
 
   public GitRepoDto getRepository(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName;
-    return client.retrieve(get(path, token), GitRepoDto.class);
+    return client.retrieve(get(path, token, ACCEPT_JSON), GitRepoDto.class);
   }
 
   public List<WebHooksDto> getWebHooks(String repoFullName, String token) {
     Objects.requireNonNull(repoFullName);
     Objects.requireNonNull(token);
     String path = "/repos/" + repoFullName + "/hooks";
-    return client.retrieve(get(path, token), Argument.listOf(WebHooksDto.class));
+    return client.retrieve(get(path, token, ACCEPT_JSON), Argument.listOf(WebHooksDto.class));
   }
 
   public WebHooksDto createWebhook(String repoName, String token) {
@@ -109,7 +114,7 @@ public class GithubClient {
             "active", true,
             "events", List.of("pull_request"),
             "config", Map.of(
-                    "url", "https://upscale-sixfold-extruding.ngrok-free.dev/api/hooks/receive/GITHUB",
+                    "url", "https://" + ngrokUrl + "/api/hooks/receive/GITHUB",
                     "content_type", "json",
                     "insecure_ssl", "0"));
     return client.retrieve(post(path, token, body), WebHooksDto.class);
@@ -173,20 +178,25 @@ public class GithubClient {
         return Optional.empty();
       }
       return Optional.of(
-              new GitWebhookDto(
-                      GitProviderType.GITHUB,
-                      dto.pullRequest().number(),
-                      dto.repository().fullName(),
-                      dto.pullRequest().base().sha(),
-                      dto.pullRequest().head().sha(),
-                      dto.action()
-              )
+          new GitWebhookDto(
+              GitProviderType.GITHUB,
+              dto.pullRequest().number(),
+              dto.repository().fullName(),
+              dto.pullRequest().base().sha(),
+              dto.pullRequest().head().sha(),
+              dto.action(),
+              dto.pullRequest().diffUrl())
       );
+
     } catch (IOException e) {
       throw new IllegalArgumentException("Webhook GitHub invalide", e);
     }
   }
 
+  public String getPullRequestDiff(String diffUrl, String token) {
+    Objects.requireNonNull(diffUrl);
+    Objects.requireNonNull(token);
+    return client.retrieve(get(diffUrl, token, ACCEPT_DIFF), String.class);
+  }
+
 }
-
-

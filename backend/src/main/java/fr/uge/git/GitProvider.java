@@ -1,6 +1,5 @@
 package fr.uge.git;
 
-
 import fr.uge.git.model.*;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
@@ -29,4 +28,5 @@ public interface GitProvider {
 
   CloneParams cloneSpec(GitWebhookDto event);
 
+  String getPullRequestDiff(String diffUrl);
 }
