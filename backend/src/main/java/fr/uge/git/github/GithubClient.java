@@ -178,24 +178,25 @@ public class GithubClient {
         return Optional.empty();
       }
       return Optional.of(
-              new GitWebhookDto(
-                      GitProviderType.GITHUB,
-                      dto.pullRequest().number(),
-                      dto.repository().fullName(),
-                      dto.pullRequest().base().sha(),
-                      dto.pullRequest().head().sha(),
-                      dto.action()));
+          new GitWebhookDto(
+              GitProviderType.GITHUB,
+              dto.pullRequest().number(),
+              dto.repository().fullName(),
+              dto.pullRequest().base().sha(),
+              dto.pullRequest().head().sha(),
+              dto.action(),
+              dto.pullRequest().diffUrl())
+      );
+
     } catch (IOException e) {
       throw new IllegalArgumentException("Webhook GitHub invalide", e);
     }
   }
 
-  public String getPullRequestDiff(String repoFullName, long pullNumber, String token) {
-    Objects.requireNonNull(repoFullName);
+  public String getPullRequestDiff(String diffUrl, String token) {
+    Objects.requireNonNull(diffUrl);
     Objects.requireNonNull(token);
-
-    String path = "/repos/" + repoFullName + "/pulls/" + pullNumber;
-    return client.retrieve(get(path, token, ACCEPT_DIFF), String.class);
+    return client.retrieve(get(diffUrl, token, ACCEPT_DIFF), String.class);
   }
 
 }

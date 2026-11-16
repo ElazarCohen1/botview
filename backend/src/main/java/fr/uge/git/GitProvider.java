@@ -28,5 +28,5 @@ public interface GitProvider {
 
   CloneParams cloneSpec(GitWebhookDto event);
 
-  String getPullRequestDiff(String repoName, long prNumber);
+  String getPullRequestDiff(String diffUrl);
 }

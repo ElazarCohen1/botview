@@ -73,7 +73,7 @@ public class BitbucketProvider implements GitProvider {
   }
 
   @Override
-  public String getPullRequestDiff(String repoName, long prNumber) {
+  public  String getPullRequestDiff(String diffUrl) {
     return "";
   }
 
