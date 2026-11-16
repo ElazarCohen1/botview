@@ -190,7 +190,6 @@ public class GithubClient {
                       dto.pullRequest().diffUrl())
       );
 
-
     } catch (IOException e) {
       throw new IllegalArgumentException("Webhook GitHub invalide", e);
     }
