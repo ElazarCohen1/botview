@@ -91,7 +91,7 @@ public class PullRequestQueries {
    * @throws SQLException if a database error occurs
    */
   @Transactional
-  public void insertPullRequest(long pullRequestId, String url, String status, int repositoryId) throws SQLException {
+  public int insertPullRequest(long pullRequestId, String url, String status, int repositoryId) throws SQLException {
     Objects.requireNonNull(url);
     Objects.requireNonNull(status);
     var sql = """
@@ -105,6 +105,7 @@ public class PullRequestQueries {
                 repository_id
             )
             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+            RETURNING id
             """;
 
     try (var conn = dataSource.getConnection();
@@ -116,7 +117,13 @@ public class PullRequestQueries {
       stmt.setString(4, status.toUpperCase(Locale.ROOT));
       stmt.setInt(5, repositoryId);
 
-      stmt.executeUpdate();
+      try (var rs = stmt.executeQuery()) {
+        if (!rs.next()) {
+          throw new SQLException("Failed to insert pull request");
+        }
+        return rs.getInt("id");
+      }
+
     }
   }
 
@@ -129,13 +136,14 @@ public class PullRequestQueries {
    * @throws SQLException if a database error occurs
    */
   @Transactional
-  public void updatePullRequest(long pullRequestId, int repoId, String state) throws SQLException {
+  public int updatePullRequest(long pullRequestId, int repoId, String state) throws SQLException {
     Objects.requireNonNull(state);
 
     var sql = """
             UPDATE PULL_REQUEST
             SET state = ?, updated_at = CURRENT_TIMESTAMP
             WHERE number = ? AND repository_id = ?
+            RETURNING id
             """;
 
     try (var conn = dataSource.getConnection();
@@ -144,9 +152,12 @@ public class PullRequestQueries {
       stmt.setString(1, state.toUpperCase(Locale.ROOT));
       stmt.setLong(2, pullRequestId);
       stmt.setInt(3, repoId);
-
-      stmt.executeUpdate();
-      IO.println("pr updated in bdd: " + state + " " + pullRequestId + " " + repoId);
+      try (var rs = stmt.executeQuery()) {
+        if (!rs.next()) {
+          throw new SQLException("Failed to insert pull request");
+        }
+        return rs.getInt("id");
+      }
     }
   }
 

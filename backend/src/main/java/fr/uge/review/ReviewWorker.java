@@ -1,4 +1,3 @@
-
 package fr.uge.review;
 
 import fr.uge.analysis.AnalysisRunner;
@@ -7,7 +6,9 @@ import fr.uge.analysis.model.AnalysisResult;
 import fr.uge.database.Database;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.model.GitWebhookDto;
+import fr.uge.llm.LlmParser;
 import fr.uge.llm.LlmService;
+import fr.uge.llm.model.LlmIssue;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
@@ -16,9 +17,8 @@ import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Locale;
-
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Requires(notEnv = "test")
@@ -37,19 +37,21 @@ public class ReviewWorker {
           - If the line cannot be determined, do not report the issue.
           - Do not copy the static analysis results, only use them as hints.
           - Return ONLY valid JSON, no text outside it.
+          - The response must start with { and end with }.
           
           OUTPUT FORMAT:
-          {"issues":[{"file":"path/to/file","line":42,"rule":"Short title","description":"Short explanation"}]}
+          {"global_comment": "a review on all the pull request" , "issues":[{"file":"path/to/file","line":42,"rule":"Short title","description":"Short explanation","is_blocking" : boolean}]}
           
           If no issue is found, return: {"issues":[]}
           """;
+
   private final ReviewQueue queue;
   private final GitProviderFactory factory;
   private final RepoCloner cloner;
   private final AnalysisRunner analysisRunner;
   private final LlmService llm;
   private final Database database;
-
+  private final LlmParser llmParser;
   private Thread workerThread;
 
   public ReviewWorker(ReviewQueue queue,
@@ -57,21 +59,21 @@ public class ReviewWorker {
                       RepoCloner cloner,
                       AnalysisRunner analysisRunner,
                       LlmService llm,
-                      Database database) {
+                      Database database,
+                      LlmParser llmParser) {
     this.queue = queue;
     this.factory = factory;
     this.cloner = cloner;
     this.analysisRunner = analysisRunner;
     this.llm = llm;
     this.database = database;
+    this.llmParser = llmParser;
     super();
   }
 
   @EventListener
   public void onApplicationEvent(StartupEvent event) {
-    workerThread = Thread.ofPlatform()
-            .name("review-worker")
-            .start(this::consumeQueue);
+    workerThread = Thread.ofPlatform().name("review-worker").start(this::consumeQueue);
   }
 
   private void consumeQueue() {
@@ -90,38 +92,19 @@ public class ReviewWorker {
     }
   }
 
-  private void insertOrUpdatePr(GitWebhookDto event) throws SQLException {
-    // throw if we dont have the repo in the bdd bit get a pull request (not normal)Z
+  private int insertOrUpdatePr(GitWebhookDto event) throws SQLException {
+    // throw if we dont have the repo in the bdd bit get a pull request (not normal)
     var repo = database.getRepositoryQueries().findByUrl(event.repoUrl()).orElseThrow();
     var databasePr = database.getPullRequestQueries();
-    switch (event.action().toLowerCase(Locale.ROOT)) {
-      case "opened" -> databasePr.insertPullRequest(
-              event.prNumber(),
-              event.PullRequestUrl(),
-              "OPENED",
-              repo.id()
-      );
+    return switch (event.action().toLowerCase(Locale.ROOT)) {
+      case "opened" -> databasePr.insertPullRequest(event.prNumber(), event.PullRequestUrl(), "OPENED", repo.id());
 
-      case "reopened" -> databasePr.updatePullRequest(
-              event.prNumber(),
-              repo.id(),
-              "REOPENED"
-      );
+      case "reopened" -> databasePr.updatePullRequest(event.prNumber(), repo.id(), "REOPENED");
 
-      case "synchronize" -> databasePr.updatePullRequest(
-              event.prNumber(),
-              repo.id(),
-              "SYNCHRONIZE"
-      );
+      case "synchronize" -> databasePr.updatePullRequest(event.prNumber(), repo.id(), "SYNCHRONIZE");
 
-      default -> throw new IllegalArgumentException(
-              "Action " + event.action() + " is not supported"
-      );
-    }
-
-    if (event.action().equals("synchronize")) {
-      IO.println("pr updated");
-    }
+      default -> throw new IllegalArgumentException("Action " + event.action() + " is not supported");
+    };
 
 
   }
@@ -140,21 +123,19 @@ public class ReviewWorker {
 
   private void process(GitWebhookDto event) throws Exception {
     var git = factory.getProvider(event.provider());
-    var fileName = event.repo().replace('/', '_') + "-"
-            + event.prNumber() + "-"
-            + event.headSha().substring(0, 7);
+    var fileName = event.repo().replace('/', '_') + "-" + event.prNumber() + "-" + event.headSha().substring(0, 7);
     Path dir = null;
     try {
-      insertOrUpdatePr(event);
+      var prId = insertOrUpdatePr(event);
+
       dir = cloner.clone(git.cloneSpec(event), fileName);
       var results = analysisRunner.run(dir);
-      results.forEach(IO::println);
       var diff = git.getPullRequestDiff(event.diffUrl());
-      IO.println(diff);
-      var response = llm.complete(
-              SYSTEM_PROMPT,
-              generateUserContent(diff, formatStaticAnalysis(results)));
-      IO.println(response);
+      var response = llm.complete(SYSTEM_PROMPT, generateUserContent(diff, formatStaticAnalysis(results)));
+      var parsedResponse = llmParser.parseLlmResponse(response);
+      var isBlocking = parsedResponse.issues().stream().anyMatch(LlmIssue::blocking);
+      var reviewId = database.getReviewQueries().insertReview(parsedResponse.globalComment(),ReviewStatus.DONE,isBlocking,prId);
+      IO.println("review inserted");
     } finally {
       if (dir != null) {
         cloner.delete(dir);
@@ -164,11 +145,13 @@ public class ReviewWorker {
 
   private String formatStaticAnalysis(List<AnalysisResult> results) {
     return results.stream()
-            .flatMap(r -> r.diagnostics().stream()
-                    .map(d -> "[%s] %s:%d %s".formatted(
-                            r.tool(), d.file(), d.line(), d.message())))
-            .distinct()
-            .collect(Collectors.joining("\n"));
+            .flatMap(r ->
+                    r.diagnostics()
+                            .stream()
+                            .map(d ->
+                                    "[%s] %s:%d %s".formatted(r.tool(), d.file(), d.line(), d.message())
+                            )
+            ).distinct().collect(Collectors.joining("\n"));
   }
 
   @PreDestroy
