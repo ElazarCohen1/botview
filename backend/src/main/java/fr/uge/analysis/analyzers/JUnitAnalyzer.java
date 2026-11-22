@@ -8,7 +8,6 @@ import fr.uge.analysis.parser.JUnitReportParser;
 import fr.uge.sandbox.SandboxRunner;
 import jakarta.inject.Singleton;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -27,31 +26,16 @@ public class JUnitAnalyzer implements Analyzer {
   @Override
   public AnalysisResult run(Path projectDirectory) {
     try {
-      IO.println("Project directory: " + projectDirectory);
-      IO.println("pom.xml exists: "
-              + Files.exists(projectDirectory.resolve("pom.xml")));
-
       var result = sandboxRunner.run(
               projectDirectory,
               List.of("mvn", "test")
       );
-
-      IO.println("Exit code: " + result.exitCode());
-      IO.println("Timeout: " + result.timeout());
-
-      IO.println("========== STDOUT ==========");
-      IO.println(result.stdout());
-
-      IO.println("========== STDERR ==========");
-      IO.println(result.stderr());
-
+      
       if (result.timeout()) {
         return failed("JUnit tests timed out");
       }
 
       var diagnostics = reportParser.parse(projectDirectory);
-
-      IO.println("Diagnostics: " + diagnostics);
 
       if (result.exitCode() != 0) {
         return new AnalysisResult(
@@ -70,7 +54,6 @@ public class JUnitAnalyzer implements Analyzer {
       );
 
     } catch (Exception e) {
-      e.printStackTrace();
       return failed(e.getMessage());
     }
   }

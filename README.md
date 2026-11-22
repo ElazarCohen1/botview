@@ -1,130 +1,156 @@
-# botView
+# BotView
 
-s
+Application web de **revue automatique de Pull Requests**. Elle se connecte à un dépôt GitHub (GitLab et Bitbucket prévus), reçoit un webhook à chaque événement de PR, analyse le code et publie une review.
 
-## Getting started
+- **Backend** : Micronaut + Maven, JDBC
+- **Frontend** : Svelte + Vite, UI Bootstrap
+- **Base de données** : DuckDB (fichier local)
+- **Exposition du webhook** : ngrok
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+---
 
-Already a pro? Just edit this README.md and make it your own. Want to make it
-easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file)
-  or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or
-  push an existing Git repository with the following command:
+## Workflow cible
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/elazarcohen01-group/botview.git
-git branch -M main
-git push -uf origin main
+ GitHub / GitLab / Bitbucket (PR)
+              |
+              v
+        Webhook (queue)
+           |          |
+           v          |
+   Analyses statiques |
+           |          |
+           v          |
+     Revue par LLM <--+
+           |
+           v
+ Agrégation, déduplication, fusion
+        |             |
+        v             v
+  Commentaire PR   Dashboard / Historique (DB)
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/elazarcohen01-group/botview/-/settings/integrations)
+## Prérequis
 
-## Collaborate with your team
+- JDK 27 
+- Node.js 20+ et npm
+- Maven (ou le wrapper `backend/mvnw`)
+- Un compte [ngrok](https://ngrok.com) (gratuit) pour recevoir les webhooks en local
+- Un token GitHub (voir plus bas)
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## Variables d'environnement
 
-Use the built-in continuous integration in GitLab.
+| Variable  | Rôle |
+|---|---|
+| `GITHUB_TOKEN`  | Token d'accès à l'API GitHub |
+| `GITLAB_TOKEN`  | Token GitLab |
+| `BITBUCKET_TOKEN`    | Token Bitbucket |
+| `NGROK_AUTHTOKEN` |  | Authentifie l'application auprès de ngrok |
+| `NGROK_URL` | url recu de ngrok| 
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+Ces variables sont lues dans `backend/src/main/resources/application.yml` (`${GITHUB_TOKEN:}` etc.). Si une variable n'est pas définie, la valeur par défaut est vide. Pour GitHub, l'appel à l'API échouera alors avec une erreur d'authentification.
 
-***
+### GitHub : `GITHUB_TOKEN`
 
-# Editing this README
+1. GitHub → **Settings → Developer settings → Personal access tokens**.
+2. Créer un token **classic** avec les scopes :
+   - `repo` (lire les dépôts et les PR)
+   - `admin:repo_hook` (créer et supprimer les webhooks)
+3. Copier le token (il n'est affiché qu'une fois).
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to
-structure it however you want - this is just a starting point!). Thanks
-to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### GitLab : `GITLAB_TOKEN` et Bitbucket : `BITBUCKET_TOKEN`
 
-## Suggestions for a good README
+pareil que github
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are
-suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long
-is better than too short. If you think your README is too long, consider utilizing another form of documentation rather
-than cutting out information.
+### ngrok : `NGROK_AUTHTOKEN`
 
-## Name
+Les webhooks GitHub doivent atteindre une URL publique. En local, ngrok crée un tunnel vers `http://localhost:8080`.
 
-Choose a self-explaining name for your project.
+1. Créer un compte sur [dashboard.ngrok.com](https://dashboard.ngrok.com).
+2. Récupérer l'authtoken dans **Your Authtoken**.
+3. Le définir dans la variable `NGROK_AUTHTOKEN`. Le code utilise `Session.withAuthtokenFromEnv()`, qui lit exactement cette variable.
+4. Récupérer un **domaine statique gratuit** dans **Domains** (par exemple `xxx-yyy-zzz.ngrok-free.dev`).
 
-## Description
+### ngrok : l'URL publique (domaine)
 
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be
-unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your
-project, this is a good place to list differentiating factors.
+Pour désactiver ngrok (par exemple pour travailler sans webhook), mettre `ngrok.enabled: false` dans `application.yml`. Les tests le désactivent déjà via `application-test.yml`.
 
-## Badges
+--- 
 
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the
-project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Lancer le projet
 
-## Visuals
+Le frontend est déjà compilé dans `backend/src/main/resources/public` et il est servi directement par le backend. **Node.js n'est donc pas nécessaire pour utiliser l'application** : il suffit de lancer le backend. L'application est ensuite disponible sur http://localhost:8080.
 
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see
-GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Pense à définir les [variables d'environnement](#variables-denvironnement) avant de lancer.
 
-## Installation
+### Option 1 : lancer le jar
 
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew.
-However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing
-specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a
-specific context like a particular programming language version or operating system or has dependencies that have to be
-installed manually, also add a Requirements subsection.
+```bash
+cd backend
+mvn package                       # génère le jar dans backend/target/
+java -jar target/<nom-du-jar>.jar
+```
 
-## Usage
+Le dossier `data/` (base DuckDB) est créé à côté du jar. Le modèle LLM est téléchargé dans `./models/` par rapport au dossier depuis lequel on lance la commande (modifiable avec `LLM_MODEL_PATH`).
 
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of
-usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably
-include in the README.
+### Option 2 : lancer directement le backend avec Maven
 
-## Support
+```bash
+cd backend
+mvn mn:run
+```
 
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address,
-etc.
+### Premier démarrage
 
-## Roadmap
+Au premier lancement, le modèle LLM (plusieurs Go) est téléchargé en tâche de fond. L'application est utilisable pendant ce temps, mais la revue par LLM n'est disponible qu'une fois le modèle chargé.
 
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+--- 
 
-## Contributing
+## Structure du projet
 
-State if you are open to contributions and what your requirements are for accepting them.
+```
+botview/
+├── backend/                  # Micronaut (Java, Maven)
+│   └── src/main/java/fr/uge/
+│       ├── controller/       # API REST (/api/...)
+│       ├── git/              # Providers GitHub / GitLab / Bitbucket + DTO
+│       ├── database/         # Requêtes JDBC DuckDB
+│       ├── llm/              # Téléchargement et exécution du modèle
+│       ├── nGrok/            # Tunnel ngrok au démarrage
+│       └── DatabaseInitializer.java
+├── frontend/                 # Svelte + Vite + Bootstrap
+│   └── src/{pages,components,api,lib,types}
+└── package.json              # scripts dev / build
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started.
-Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps
-explicit. These instructions could also be useful to your future self.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce
-the likelihood that the changes inadvertently break something. Having instructions for running tests is especially
-helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Choix techniques et problèmes rencontrés
 
-## Authors and acknowledgment
+### Clés étrangères et `UPDATE` dans DuckDB
 
-Show your appreciation to those who have contributed to the project.
+#### Problème
 
-## License
+DuckDB implémente un `UPDATE` comme un `DELETE` suivi d'un `INSERT`. Quand une table parent (ici `PULL_REQUEST`) est référencée par une clé étrangère dans d'autres tables (`REVIEW`, `MODIFIES`), la mise à jour d'une de ses lignes échoue : au moment du `DELETE` interne, des lignes enfants référencent encore l'ancienne ligne, ce qui viole la contrainte.
 
-For open source projects, say how it is licensed.
+On obtenait donc l'erreur suivante dès qu'une PR avait déjà une review :
 
-## Project status
+```
+Constraint Error: Violates foreign key constraint because key "pull_request_id: 1"
+is still referenced by a foreign key in a different table.
+```
 
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has
-slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or
-owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Il s'agit d'une limitation documentée de DuckDB sur les clés étrangères.
+
+#### Solution de contournement
+
+Les contraintes `REFERENCES` ont été supprimées dans les tables enfants, tout en conservant la colonne qui porte la référence (par exemple `pull_request_id`). Les jointures restent possibles et s'écrivent de la même façon, car un `JOIN` ne dépend pas de l'existence d'une contrainte.
+
+#### Conséquence
+
+La base ne garantit plus l'intégrité référentielle. C'est le code Java qui doit s'en charger, par exemple en supprimant les enregistrements enfants avant le parent.
+ 
+

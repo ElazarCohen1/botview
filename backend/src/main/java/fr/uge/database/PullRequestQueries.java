@@ -8,10 +8,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 @Singleton
 public class PullRequestQueries {
@@ -136,31 +133,34 @@ public class PullRequestQueries {
    * @throws SQLException if a database error occurs
    */
   @Transactional
-  public int updatePullRequest(long pullRequestId, int repoId, String state) throws SQLException {
+  public Optional<Integer> updatePullRequest(long pullRequestId, int repoId, String state) throws SQLException {
     Objects.requireNonNull(state);
 
-    var sql = """
-            UPDATE PULL_REQUEST
-            SET state = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE number = ? AND repository_id = ?
-            RETURNING id
-            """;
+    var update = """
+          UPDATE PULL_REQUEST
+          SET state = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE number = ? AND repository_id = ?
+          """;
+    var select = "SELECT id FROM PULL_REQUEST WHERE number = ? AND repository_id = ?";
 
-    try (var conn = dataSource.getConnection();
-         var stmt = conn.prepareStatement(sql)) {
-
-      stmt.setString(1, state.toUpperCase(Locale.ROOT));
-      stmt.setLong(2, pullRequestId);
-      stmt.setInt(3, repoId);
-      try (var rs = stmt.executeQuery()) {
-        if (!rs.next()) {
-          throw new SQLException("Failed to insert pull request");
+    try (var conn = dataSource.getConnection()) {
+      try (var stmt = conn.prepareStatement(update)) {
+        stmt.setString(1, state.toUpperCase(Locale.ROOT));
+        stmt.setLong(2, pullRequestId);
+        stmt.setInt(3, repoId);
+        if (stmt.executeUpdate() == 0) {
+          return Optional.empty();
         }
-        return rs.getInt("id");
+      }
+      try (var stmt = conn.prepareStatement(select)) {
+        stmt.setLong(1, pullRequestId);
+        stmt.setInt(2, repoId);
+        try (var rs = stmt.executeQuery()) {
+          return rs.next() ? Optional.of(rs.getInt("id")) : Optional.empty();
+        }
       }
     }
   }
-
 
   /**
    * Get a specific pull request from the database
