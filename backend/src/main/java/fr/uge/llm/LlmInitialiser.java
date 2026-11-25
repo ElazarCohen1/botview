@@ -47,7 +47,11 @@ public class LlmInitialiser {
   private void loadModel() throws IOException, InterruptedException {
     try {
       var path = downloader.ensureModel(Path.of(modelPath), URI.create(modelUrl));
-      var loadedModel = new LlamaModel(new ModelParameters().setModel(path.toString()));
+      var loadedModel = new LlamaModel(new ModelParameters().setModel(path.toString())
+              .setGpuLayers(99)
+              .setCtxSize(4096)
+              .setThreads(4)
+              .setThreadsBatch(8));
       lock.lock();
       try {
         if (status == Status.CLOSED) {

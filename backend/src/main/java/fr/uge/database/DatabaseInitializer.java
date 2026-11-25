@@ -3,8 +3,8 @@ package fr.uge.database;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.data.connection.annotation.Connectable;
-import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Singleton;
+import org.jspecify.annotations.NonNull;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,7 +24,7 @@ public class DatabaseInitializer implements ApplicationEventListener<StartupEven
 
   @Connectable
   @Override
-  public void onApplicationEvent(StartupEvent event) {
+  public void onApplicationEvent(@NonNull StartupEvent event) {
     try {
       init();
     } catch (SQLException e) {
@@ -65,8 +65,8 @@ public class DatabaseInitializer implements ApplicationEventListener<StartupEven
   }
 
   private void createSequences(Statement stmt) throws SQLException {
-    for (var table : new String[]{
-            "repository", "pull_request", "review", "analysis", "file", "modified_line"}) {
+    var sequenceTable = new String[]{"repository", "pull_request", "review", "analysis", "file", "modified_line","comment_on"};
+    for (var table : sequenceTable) {
       stmt.execute("CREATE SEQUENCE IF NOT EXISTS " + table + "_seq START 1");
     }
   }
@@ -74,12 +74,12 @@ public class DatabaseInitializer implements ApplicationEventListener<StartupEven
   private void createTables(Statement stmt) throws SQLException {
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS REPOSITORY (
-              id          INTEGER PRIMARY KEY DEFAULT nextval('repository_seq'),
-              name        VARCHAR(255) NOT NULL CHECK (length(name) <= 255),
-              url         VARCHAR(2048) NOT NULL UNIQUE CHECK (length(url) <= 2048),
-              origin      gitProvider NOT NULL,
-              has_webhook boolean NOT NULL,
-              webhook_id VARCHAR(255)
+                id          INTEGER PRIMARY KEY DEFAULT nextval('repository_seq'),
+                name        VARCHAR(255) NOT NULL CHECK (length(name) <= 255),
+                url         VARCHAR(2048) NOT NULL UNIQUE CHECK (length(url) <= 2048),
+                origin      gitProvider NOT NULL,
+                has_webhook boolean NOT NULL,
+                webhook_id VARCHAR(255)
             )""");
 
     stmt.execute("""
@@ -88,7 +88,7 @@ public class DatabaseInitializer implements ApplicationEventListener<StartupEven
                 number         INTEGER NOT NULL,
                 name           VARCHAR(255) NOT NULL,
                 url            VARCHAR(2048) NOT NULL,
-                state          pr_status NOT NULL DEFAULT 'OPEN',
+                state          pr_status NOT NULL DEFAULT 'OPENED',
                 created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
                 updated_at     TIMESTAMP NOT NULL DEFAULT current_timestamp,
                 repository_id  INTEGER NOT NULL REFERENCES REPOSITORY(id),
@@ -98,58 +98,59 @@ public class DatabaseInitializer implements ApplicationEventListener<StartupEven
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS REVIEW (
-              id              INTEGER PRIMARY KEY DEFAULT nextval('review_seq'),
-              global_comment  TEXT,
-              status          review_status NOT NULL,
-              is_blocking     BOOLEAN NOT NULL DEFAULT false,
-              created_at      TIMESTAMP NOT NULL DEFAULT current_timestamp,
-              pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id)
+                id              INTEGER PRIMARY KEY DEFAULT nextval('review_seq'),
+                global_comment  TEXT,
+                status          review_status NOT NULL,
+                is_blocking     BOOLEAN NOT NULL DEFAULT false,
+                created_at      TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id)
             )""");
 
     stmt.execute("""
             
             CREATE TABLE IF NOT EXISTS ANALYSIS (
-              id          INTEGER PRIMARY KEY DEFAULT nextval('analysis_seq'),
-              tool        VARCHAR(100) NOT NULL,
-              result      TEXT,
-              status      analysis_status NOT NULL,
-              created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
-              review_id   INTEGER NOT NULL REFERENCES REVIEW(id)
+                id          INTEGER PRIMARY KEY DEFAULT nextval('analysis_seq'),
+                tool        VARCHAR(100) NOT NULL,
+                result      TEXT,
+                status      analysis_status NOT NULL,
+                created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                review_id   INTEGER NOT NULL REFERENCES REVIEW(id)
             )""");
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS FILE (
-              id             INTEGER PRIMARY KEY DEFAULT nextval('file_seq'),
-              status         change_status NOT NULL,
-              name           VARCHAR(255) NOT NULL,
-              relative_path  VARCHAR(1024) NOT NULL,
-              created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp
+                id             INTEGER PRIMARY KEY DEFAULT nextval('file_seq'),
+                status         change_status NOT NULL,
+                name           VARCHAR(255) NOT NULL,
+                relative_path  VARCHAR(1024) NOT NULL,
+                created_at     TIMESTAMP NOT NULL DEFAULT current_timestamp
             )""");
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS MODIFIED_LINE (
-              id         INTEGER PRIMARY KEY DEFAULT nextval('modified_line_seq'),
-              line_number INTEGER NOT NULL,
-              status     change_status NOT NULL,
-              old_value  TEXT,
-              new_value  TEXT,
-              file_id    INTEGER NOT NULL REFERENCES FILE(id)
+                id         INTEGER PRIMARY KEY DEFAULT nextval('modified_line_seq'),
+                line_number INTEGER NOT NULL,
+                status     change_status NOT NULL,
+                old_value  TEXT,
+                new_value  TEXT,
+                file_id    INTEGER NOT NULL REFERENCES FILE(id)
             )""");
 
     // Associations
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS MODIFIES (
-              pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id),
-              file_id         INTEGER NOT NULL REFERENCES FILE(id),
-              PRIMARY KEY (pull_request_id, file_id)
+                pull_request_id INTEGER NOT NULL REFERENCES PULL_REQUEST(id),
+                file_id         INTEGER NOT NULL REFERENCES FILE(id),
+                PRIMARY KEY (pull_request_id, file_id)
             )""");
 
     stmt.execute("""
             CREATE TABLE IF NOT EXISTS COMMENTS_ON (
-              review_id         INTEGER NOT NULL REFERENCES REVIEW(id),
-              modified_line_id  INTEGER NOT NULL REFERENCES MODIFIED_LINE(id),
-              human_flag        BOOLEAN NOT NULL DEFAULT false,
-              PRIMARY KEY (review_id, modified_line_id)
+                id                INTEGER PRIMARY KEY DEFAULT nextval('comment_on_seq'),
+                review_id         INTEGER NOT NULL REFERENCES REVIEW(id),
+                modified_line_id  INTEGER NOT NULL REFERENCES MODIFIED_LINE(id),
+                human_flag        BOOLEAN NOT NULL DEFAULT false,
+                message           TEXT NOT NULL
             )""");
   }
 }

@@ -8,7 +8,8 @@ import fr.uge.git.GitProviderFactory;
 import fr.uge.git.model.GitWebhookDto;
 import fr.uge.llm.LlmParser;
 import fr.uge.llm.LlmService;
-import fr.uge.llm.model.LlmIssue;
+import fr.uge.review.parser.DiffParser;
+import fr.uge.review.service.ReviewService;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
@@ -83,6 +84,7 @@ public class ReviewWorker {
   private final Database database;
   private final LlmParser llmParser;
   private Thread workerThread;
+  private final ReviewService reviewService;
 
   public ReviewWorker(ReviewQueue queue,
                       GitProviderFactory factory,
@@ -90,7 +92,8 @@ public class ReviewWorker {
                       AnalysisRunner analysisRunner,
                       LlmService llm,
                       Database database,
-                      LlmParser llmParser) {
+                      LlmParser llmParser,
+                      ReviewService reviewService) {
     this.queue = queue;
     this.factory = factory;
     this.cloner = cloner;
@@ -98,6 +101,7 @@ public class ReviewWorker {
     this.llm = llm;
     this.database = database;
     this.llmParser = llmParser;
+    this.reviewService = reviewService;
     super();
   }
 
@@ -161,22 +165,22 @@ public class ReviewWorker {
     var git = factory.getProvider(event.provider());
     var fileName = event.repo().replace('/', '_') + "-" + event.prNumber() + "-" + event.headSha().substring(0, 7);
     Path dir = null;
-    int prId = 1;
     try {
-      prId = insertOrUpdatePr(event);
-    } catch (SQLException e) {
-      IO.println("erreur inserting the pr " + e);
-    }
-    try {
+      var prId = insertOrUpdatePr(event);
       dir = cloner.clone(git.cloneSpec(event), fileName);
       var results = analysisRunner.run(dir);
       var diff = git.getPullRequestDiff(event.diffUrl());
+      var listParsed = DiffParser.parse(diff);
       var response = llm.complete(SYSTEM_PROMPT, generateUserContent(diff, formatStaticAnalysis(results)));
-      IO.println(response);
       var parsedResponse = llmParser.parseLlmResponse(response);
-      var isBlocking = parsedResponse.issues().stream().anyMatch(LlmIssue::blocking);
-      var reviewId = database.getReviewQueries().insertReview(parsedResponse.globalComment(), ReviewStatus.DONE, isBlocking, prId);
-      IO.println("review inserted");
+      var issues = parsedResponse.issues();
+      var problematicFiles = DiffParser.filterProblematicFiles(listParsed, issues);
+      reviewService.saveReview(
+              prId,
+              parsedResponse.globalComment(),
+              problematicFiles,
+              issues
+      );
     } finally {
       if (dir != null) {
         cloner.delete(dir);
