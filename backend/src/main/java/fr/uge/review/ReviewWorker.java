@@ -1,4 +1,3 @@
-
 package fr.uge.review;
 
 import fr.uge.analysis.AnalysisRunner;
@@ -7,7 +6,10 @@ import fr.uge.analysis.model.AnalysisResult;
 import fr.uge.database.Database;
 import fr.uge.git.GitProviderFactory;
 import fr.uge.git.model.GitWebhookDto;
+import fr.uge.llm.LlmParser;
 import fr.uge.llm.LlmService;
+import fr.uge.review.parser.DiffParser;
+import fr.uge.review.service.ReviewService;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
@@ -16,9 +18,8 @@ import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Locale;
-
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Requires(notEnv = "test")
@@ -26,52 +27,87 @@ import java.util.stream.Collectors;
 public class ReviewWorker {
 
   private static final String SYSTEM_PROMPT = """
-          You are a code review assistant.
-          You receive a pull request diff and static analysis results.
-          Identify actionable code quality issues introduced by the diff.
+          You are a JSON API. You output a single raw JSON object and nothing else.
+          
+          OUTPUT FORMAT (MANDATORY):
+          - Your entire response must be one valid JSON object.
+          - The first character of your response MUST be "{" and the last MUST be "}".
+          - NEVER use Markdown. NEVER wrap the JSON in ``` or ```json fences.
+          - NEVER write any text, greeting or explanation before or after the JSON.
+          
+          JSON SCHEMA:
+          {
+            "global_comment": string,
+            "issues": "issues": [
+             {
+               "file": string,          // path of the file, as given in the diff
+               "line": integer,         // line number in the new version of the file
+               "rule": string,          // short category, e.g. "null-pointer", "security", "resource-leak", "logic-error"
+               "description": string,   // what is wrong, why it is a problem, what could happen
+               "is_blocking": boolean   // true only for bugs, security flaws or failures that must be fixed before merge
+             }
+            ]
+          }
+  
+          ROLE:
+          You are an expert software engineer doing a strict, objective Pull Request code review.
+          Report ONLY genuine technical problems introduced by this Pull Request.
           
           RULES:
-          - Only report real issues in the changed code.
-          - Do not invent files or line numbers.
-          - Every issue needs a file and a line number (new version of the file).
-          - If the line cannot be determined, do not report the issue.
-          - Do not copy the static analysis results, only use them as hints.
-          - Return ONLY valid JSON, no text outside it.
+          1. Report an issue only if you can state: what is wrong, why it is a problem, and what could happen.
+          2. Ignore formatting, naming, comments, documentation and style preferences.
+          3. Ignore pre-existing problems; only look at what the diff introduces.
+          4. Never invent or speculate. Never create issues just to look useful.
+          5. Passing tests/static analysis are not issues, but still inspect the diff for real bugs.
+          6. If tests fail, compilation fails, or static analysis finds a genuine problem, report it.
+             A test that was not executed is not a failure.
           
-          OUTPUT FORMAT:
-          {"issues":[{"file":"path/to/file","line":42,"rule":"Short title","description":"Short explanation"}]}
+          LOOK FOR: bugs, runtime exceptions, null pointers, security vulnerabilities, wrong business logic,
+          resource leaks, concurrency problems, performance problems with concrete impact, bad error handling,
+          missing validation causing real problems.
           
-          If no issue is found, return: {"issues":[]}
+          GLOBAL COMMENT:
+          - No problems: short positive summary + state that no significant issues were identified.
+          - Problems: brief summary + the most important problems.
+          
+          IF NO PROBLEMS, output exactly:
+          {"global_comment": "The Pull Request looks good. No significant issues were identified.", "issues": []}
+          
+          REMINDER: output raw JSON only, starting with "{" and ending with "}". No ``` fences.
           """;
+
   private final ReviewQueue queue;
   private final GitProviderFactory factory;
   private final RepoCloner cloner;
   private final AnalysisRunner analysisRunner;
   private final LlmService llm;
   private final Database database;
-
+  private final LlmParser llmParser;
   private Thread workerThread;
+  private final ReviewService reviewService;
 
   public ReviewWorker(ReviewQueue queue,
                       GitProviderFactory factory,
                       RepoCloner cloner,
                       AnalysisRunner analysisRunner,
                       LlmService llm,
-                      Database database) {
+                      Database database,
+                      LlmParser llmParser,
+                      ReviewService reviewService) {
     this.queue = queue;
     this.factory = factory;
     this.cloner = cloner;
     this.analysisRunner = analysisRunner;
     this.llm = llm;
     this.database = database;
+    this.llmParser = llmParser;
+    this.reviewService = reviewService;
     super();
   }
 
   @EventListener
   public void onApplicationEvent(StartupEvent event) {
-    workerThread = Thread.ofPlatform()
-            .name("review-worker")
-            .start(this::consumeQueue);
+    workerThread = Thread.ofPlatform().name("review-worker").start(this::consumeQueue);
   }
 
   private void consumeQueue() {
@@ -90,44 +126,31 @@ public class ReviewWorker {
     }
   }
 
-  private void insertOrUpdatePr(GitWebhookDto event) throws SQLException {
-    // throw if we dont have the repo in the bdd bit get a pull request (not normal)Z
+  private int insertOrUpdatePr(GitWebhookDto event) throws SQLException {
+    // throw if we dont have the repo in the bdd bit get a pull request (not normal)
     var repo = database.getRepositoryQueries().findByUrl(event.repoUrl()).orElseThrow();
     var databasePr = database.getPullRequestQueries();
-    switch (event.action().toLowerCase(Locale.ROOT)) {
-      case "opened" -> databasePr.insertPullRequest(
-              event.prNumber(),
-              event.PullRequestUrl(),
-              "OPENED",
-              repo.id()
-      );
+    return switch (event.action().toLowerCase(Locale.ROOT)) {
+      case "opened" -> databasePr.insertPullRequest(event.prNumber(), event.PullRequestUrl(), "OPENED", repo.id());
 
-      case "reopened" -> databasePr.updatePullRequest(
-              event.prNumber(),
-              repo.id(),
-              "REOPENED"
-      );
+      case "reopened" ->
+              databasePr.updatePullRequest(event.prNumber(), repo.id(), "REOPENED").orElseThrow(SQLException::new);
 
-      case "synchronize" -> databasePr.updatePullRequest(
-              event.prNumber(),
-              repo.id(),
-              "SYNCHRONIZE"
-      );
+      case "synchronize" ->
+              databasePr.updatePullRequest(event.prNumber(), repo.id(), "SYNCHRONIZE").orElseThrow(SQLException::new);
 
-      default -> throw new IllegalArgumentException(
-              "Action " + event.action() + " is not supported"
-      );
-    }
-
-    if (event.action().equals("synchronize")) {
-      IO.println("pr updated");
-    }
+      default -> throw new IllegalArgumentException("Action " + event.action() + " is not supported");
+    };
 
 
   }
 
   private String generateUserContent(String diff, String staticAnalysis) {
     return """
+            Review the following Pull Request.
+            The diff contains the modifications introduced by this PR.
+            The static analysis contains the results of automated checks
+            executed on this PR.
             <diff>
             %s
             </diff>
@@ -140,21 +163,24 @@ public class ReviewWorker {
 
   private void process(GitWebhookDto event) throws Exception {
     var git = factory.getProvider(event.provider());
-    var fileName = event.repo().replace('/', '_') + "-"
-            + event.prNumber() + "-"
-            + event.headSha().substring(0, 7);
+    var fileName = event.repo().replace('/', '_') + "-" + event.prNumber() + "-" + event.headSha().substring(0, 7);
     Path dir = null;
     try {
-      insertOrUpdatePr(event);
+      var prId = insertOrUpdatePr(event);
       dir = cloner.clone(git.cloneSpec(event), fileName);
       var results = analysisRunner.run(dir);
-      results.forEach(IO::println);
       var diff = git.getPullRequestDiff(event.diffUrl());
-      IO.println(diff);
-      var response = llm.complete(
-              SYSTEM_PROMPT,
-              generateUserContent(diff, formatStaticAnalysis(results)));
-      IO.println(response);
+      var listParsed = DiffParser.parse(diff);
+      var response = llm.complete(SYSTEM_PROMPT, generateUserContent(diff, formatStaticAnalysis(results)));
+      var parsedResponse = llmParser.parseLlmResponse(response);
+      var issues = parsedResponse.issues();
+      var problematicFiles = DiffParser.filterProblematicFiles(listParsed, issues);
+      reviewService.saveReview(
+              prId,
+              parsedResponse.globalComment(),
+              problematicFiles,
+              issues
+      );
     } finally {
       if (dir != null) {
         cloner.delete(dir);
@@ -164,11 +190,13 @@ public class ReviewWorker {
 
   private String formatStaticAnalysis(List<AnalysisResult> results) {
     return results.stream()
-            .flatMap(r -> r.diagnostics().stream()
-                    .map(d -> "[%s] %s:%d %s".formatted(
-                            r.tool(), d.file(), d.line(), d.message())))
-            .distinct()
-            .collect(Collectors.joining("\n"));
+            .flatMap(r ->
+                    r.diagnostics()
+                            .stream()
+                            .map(d ->
+                                    "[%s] %s:%d %s".formatted(r.tool(), d.file(), d.line(), d.message())
+                            )
+            ).distinct().collect(Collectors.joining("\n"));
   }
 
   @PreDestroy
