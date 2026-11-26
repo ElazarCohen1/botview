@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard.svelte';
 import Repositories from './pages/Repositories.svelte';
 import PullRequests from './pages/PullRequests.svelte';
 import Settings from './pages/Settings.svelte';
+import Reviews from "./pages/Reviews.svelte";
+import ReviewDetail from "./pages/ReviewDetail.svelte";
 
 const requireAuth = () => auth.isConnected;
 
@@ -17,6 +19,8 @@ export const routes = {
     '/': guarded(Dashboard),
     '/repositories': guarded(Repositories),
     '/pull-requests': guarded(PullRequests),
+    '/reviews': guarded(Reviews),
+    '/reviews/:id': guarded(ReviewDetail),
     '/settings': guarded(Settings),
     '*': guarded(Dashboard),
 };

@@ -4,6 +4,7 @@
     const links = [
         {href: "/", label: "Dashboard"},
         {href: "/repositories", label: "Repositories"},
+        {href: "/reviews",label: "Reviews"},
         {href: "/settings", label: "Paramètres"},
     ];
 </script>
